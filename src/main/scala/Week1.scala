@@ -2,7 +2,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.io.Source
 
-object BioInformatics1 extends App {
+object Week1 extends App {
   def patternCount(text: String, pattern: String): Int = {
     val patternLength = pattern.length
     @tailrec
@@ -118,8 +118,7 @@ object BioInformatics1 extends App {
   private def alpha(i: Int): Char = CONVERTION(i)
 
   private def patternToNumber(pattern: String): Int = {
-    @tailrec
-    def patternToNumberImpl(pattern: String, result: Int): Int = {
+    @tailrec def patternToNumberImpl(pattern: String, result: Int): Int = {
       if (pattern.length == 0) result
       else patternToNumberImpl(pattern.tail, numeric(pattern.head) + (result * 4))
     }
@@ -127,8 +126,7 @@ object BioInformatics1 extends App {
   }
 
   private def numberToPattern(n: Int, l: Int): String = {
-    @tailrec
-    def numberToPatternImpl(n: Int, result: List[Char]): String = {
+    @tailrec def numberToPatternImpl(n: Int, result: List[Char]): String = {
       if (result.length == l) result.mkString
       else numberToPatternImpl(n / 4, alpha(n % 4) :: result)
     }
@@ -246,16 +244,14 @@ object BioInformatics1 extends App {
 
   // O(k)
   def hammingDistance(l: String, r: String) = {
-    @tailrec
-    def hammingDistanceImpl(l: String, r: String, d: Int): Int =
+    @tailrec def hammingDistanceImpl(l: String, r: String, d: Int): Int =
       if (l.isEmpty) d
       else hammingDistanceImpl(l.tail, r.tail, d + (if (l.head == r.head) 0 else 1))
     hammingDistanceImpl(l, r, 0)
   }
 
   def findApproxPattern(text: String, pattern: String, d: Int): List[Int] = {
-    @tailrec
-    def findApproxPatternImpl(text: String, offset: Int, result: List[Int]): List[Int] =
+    @tailrec def findApproxPatternImpl(text: String, offset: Int, result: List[Int]): List[Int] =
       if (text.length < pattern.length) result
       else {
         val currentD = hammingDistance(text.substring(0, pattern.length), pattern)
@@ -266,8 +262,7 @@ object BioInformatics1 extends App {
 
   // O(n.k)
   def countApproxPattern(text: String, pattern: String, d: Int): Int = {
-    @tailrec
-    def countApproxPatternImpl(text: String, count: Int): Int =
+    @tailrec def countApproxPatternImpl(text: String, count: Int): Int =
       if (text.length < pattern.length) count
       else {
         val currentD = hammingDistance(text.substring(0, pattern.length), pattern)

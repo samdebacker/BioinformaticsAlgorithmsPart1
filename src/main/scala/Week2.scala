@@ -2,7 +2,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.parallel.ParSeq
 
-object BioInformatics2
+object Week2
   extends App
 {
   val geneticCode = Map(
@@ -101,8 +101,7 @@ object BioInformatics2
   val reverseGenericCode = geneticCode.groupBy(_._2).filterKeys(!_.isEmpty).mapValues(_.keySet)
 
   def peptideFor(rnaPattern: String) = {
-    @tailrec
-    def peptideForImpl(rnaPattern: String, result: String): String = {
+    @tailrec def peptideForImpl(rnaPattern: String, result: String): String = {
       if (rnaPattern.length < 3)
         result
       else
@@ -124,8 +123,7 @@ object BioInformatics2
 
 
   def countPossiblePatternsTranslatingToPeptide(peptide: String) = {
-    @tailrec
-    def countPossiblePatternsTranslatingToPeptideImpl(peptide: String, result: Long): Long = {
+    @tailrec def countPossiblePatternsTranslatingToPeptideImpl(peptide: String, result: Long): Long = {
       if (peptide.isEmpty) result
       else countPossiblePatternsTranslatingToPeptideImpl(peptide.substring(1), result * reverseGenericCode(peptide.substring(0, 1)).size)
     }
@@ -135,32 +133,29 @@ object BioInformatics2
   def dnaToRnaPatterns(dnaPattern: String): (String, String) = {
     def transcribe(dnaPattern: String): String = {
       def transcribe(c: Char): Char = if (c == 'T') 'U' else c
-      @tailrec
-      def transcribeImpl(dnaPattern: String, result: String): String =
+      @tailrec def transcribeImpl(dnaPattern: String, result: String): String =
         if (dnaPattern.isEmpty) result
         else transcribeImpl(dnaPattern.tail, result + transcribe(dnaPattern.head))
       transcribeImpl(dnaPattern, "")
     }
-    (transcribe(dnaPattern), transcribe(BioInformatics1.reverseComplement(dnaPattern)))
+    (transcribe(dnaPattern), transcribe(Week1.reverseComplement(dnaPattern)))
   }
 
   def dnaEncodesPeptide(dnaPattern: String, peptide: String) = {
     val peptideLength = peptide.length * 3
     def transcribe(dnaPattern: String): String = {
       def transcribe(c: Char) = if (c == 'T') 'U' else c
-      @tailrec
-      def transcribeImpl(dnaPattern: String, result: String): String =
+      @tailrec def transcribeImpl(dnaPattern: String, result: String): String =
         if (dnaPattern.isEmpty) result
         else transcribeImpl(dnaPattern.tail, result + transcribe(dnaPattern.head))
       transcribeImpl(dnaPattern, "")
     }
-    @tailrec
-    def dnaEncodesPeptideImpl(dnaPattern: String, result: Seq[String], c: Int): Seq[String] = {
+    @tailrec def dnaEncodesPeptideImpl(dnaPattern: String, result: Seq[String], c: Int): Seq[String] = {
       if (dnaPattern.length < peptideLength) result
       else {
         if (c % 10000 == 0) println(c)
         val dnaPart = dnaPattern.substring(0, peptideLength)
-        dnaEncodesPeptideImpl(dnaPattern.tail, if (peptide == fastPeptideFor(transcribe(dnaPart)) || peptide == fastPeptideFor(transcribe(BioInformatics1.reverseComplement(dnaPart)))) {
+        dnaEncodesPeptideImpl(dnaPattern.tail, if (peptide == fastPeptideFor(transcribe(dnaPart)) || peptide == fastPeptideFor(transcribe(Week1.reverseComplement(dnaPart)))) {
           println(dnaPart); result :+ dnaPart
         } else result, c + 1)
       }
