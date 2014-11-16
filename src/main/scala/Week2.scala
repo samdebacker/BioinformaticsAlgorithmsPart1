@@ -1,6 +1,5 @@
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.collection.parallel.ParSeq
 
 object Week2
   extends App
@@ -261,8 +260,7 @@ object Week2
     peptide.diff(spectrum).isEmpty
   }
 
-  private final def expand(peptides: ParSeq[Peptide], massesToUse: Seq[Int] = masses): ParSeq[Peptide] = {
-    // TODO can we elegantly make this work for Seq and ParSeq
+  private final def expand(peptides: Seq[Peptide], massesToUse: Seq[Int] = masses): Seq[Peptide] = {
     for {
       peptide <- peptides
       mass <- massesToUse
@@ -276,7 +274,7 @@ object Week2
   def cyclopeptideSequencingBranchAndBound(spectrum: Spectrum): Set[Peptide] = {
     var results = Set.empty[Seq[Int]]
     val basicAminoAcidsInSpectrum: Seq[Int] = masses.intersect(spectrum)
-    var peptides = Seq(Seq.empty[Int]).par // Do we really need parallel? No
+    var peptides = Seq(Seq.empty[Int]) // DO NOT .par, due to some side-effect things go wrong
     //println("Peptides = " + peptides.size)
     while (peptides.nonEmpty) {
       peptides = expand(peptides, basicAminoAcidsInSpectrum)
@@ -408,11 +406,13 @@ object Week2
 //  peptide = "TMLA"
 //  println(s"fastCyclicSpectrum($peptide)" + fastCyclicSpectrum(peptide).map(_._2).mkString(" "))
 
-  val spectrum =  "0 71 97 99 103 113 113 114 115 131 137 196 200 202 208 214 226 227 228 240 245 299 311 311 316 327 337 339 340 341 358 408 414 424 429 436 440 442 453 455 471 507 527 537 539 542 551 554 556 566 586 622 638 640 651 653 657 664 669 679 685 735 752 753 754 756 766 777 782 782 794 848 853 865 866 867 879 885 891 893 897 956 962 978 979 980 980 990 994 996 1022 1093".split(" ").map(_.toInt)
+//  val spectrum =  "0 71 97 99 103 113 113 114 115 131 137 196 200 202 208 214 226 227 228 240 245 299 311 311 316 327 337 339 340 341 358 408 414 424 429 436 440 442 453 455 471 507 527 537 539 542 551 554 556 566 586 622 638 640 651 653 657 664 669 679 685 735 752 753 754 756 766 777 782 782 794 848 853 865 866 867 879 885 891 893 897 956 962 978 979 980 980 990 994 996 1022 1093".split(" ").map(_.toInt)
 //  val spectrum = "0 87 87 99 101 103 128 129 129 131 137 156 174 216 216 227 230 231 234 236 238 285 287 303 303 317 330 337 362 364 367 372 390 404 416 432 454 459 461 465 466 467 503 518 519 533 541 553 568 588 590 594 598 606 617 640 647 670 681 689 693 697 699 719 734 746 754 768 769 784 820 821 822 826 828 833 855 871 883 897 915 920 923 925 950 957 970 984 984 1000 1002 1049 1051 1053 1056 1057 1060 1071 1071 1113 1131 1150 1156 1158 1158 1159 1184 1186 1188 1200 1200 1287".split(" ").map(_.toInt)
 //  val spectrum =  "0 97 97 99 101 103 196 198 198 200 202 295 297 299 299 301 394 396 398 400 400 497".split(" ").map(_.toInt)
-//  val spectrum =  "0 101 103 113 113 113 115 128 128 131 137 163 204 216 226 228 228 244 256 259 264 265 300 317 331 341 341 357 367 372 387 393 401 428 432 444 454 472 480 485 500 504 524 529 545 556 557 585 595 600 613 617 632 637 657 658 687 688 708 713 728 732 745 750 760 788 789 800 816 821 841 845 860 865 873 891 901 913 917 944 952 958 973 978 988 1004 1004 1014 1028 1045 1080 1081 1086 1089 1101 1117 1117 1119 1129 1141 1182 1208 1214 1217 1217 1230 1232 1232 1232 1242 1244 1345".split(" ").map(_.toInt)
+  val spectrum =  "0 101 103 113 113 113 115 128 128 131 137 163 204 216 226 228 228 244 256 259 264 265 300 317 331 341 341 357 367 372 387 393 401 428 432 444 454 472 480 485 500 504 524 529 545 556 557 585 595 600 613 617 632 637 657 658 687 688 708 713 728 732 745 750 760 788 789 800 816 821 841 845 860 865 873 891 901 913 917 944 952 958 973 978 988 1004 1004 1014 1028 1045 1080 1081 1086 1089 1101 1117 1117 1119 1129 1141 1182 1208 1214 1217 1217 1230 1232 1232 1232 1242 1244 1345".split(" ").map(_.toInt)
 //  val spectrum =  "0 57 57 114 114 171 171 228".split(" ").map(_.toInt)
+//  val spectrum = "0 113 128 186 241 299 314 427".split(" ").map(_.toInt)
+//  val spectrum = "0 97 101 101 103 113 128 128 156 163 198 216 225 229 241 257 264 266 284 326 338 344 354 367 379 385 385 392 439 441 480 482 482 486 495 507 542 548 583 595 604 608 608 610 649 651 698 705 705 711 723 736 746 752 764 806 824 826 833 849 861 865 874 892 927 934 962 962 977 987 989 989 993 1090".split(" ").map(_.toInt)
   println(s"cyclopeptideSequencingBranchAndBound({" + spectrum.mkString(",") + "}) = " + cyclopeptideSequencingBranchAndBound(spectrum).map(_.mkString("-")).mkString(" "))
 
 //  val spectrum = "0 71 99 101 103 128 129 199 200 204 227 230 231 298 303 328 330 332 333".split(" ").map(_.toInt)
