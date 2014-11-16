@@ -1,5 +1,6 @@
 import scala.annotation.tailrec
 import scala.collection.mutable
+import scala.collection.parallel.ParSeq
 
 object BioInformatics2
   extends App
@@ -367,7 +368,8 @@ object BioInformatics2
     peptide.diff(spectrum).isEmpty
   }
 
-  private final def expand(peptides: Seq[Peptide], massesToUse: Seq[Int] = masses): Seq[Peptide] = {
+  private final def expand(peptides: ParSeq[Peptide], massesToUse: Seq[Int] = masses): ParSeq[Peptide] = {
+    // TODO can wqe elegantly make this work for Seq and ParSeq
     for {
       peptide <- peptides
       mass <- massesToUse
@@ -375,12 +377,13 @@ object BioInformatics2
   }
 
   /* uses massive memory, start sbt with:
-      sbt -J-Xmx16G... well not anymore since we now correctly check the LSP is consistent with the SP, and not my own peptide is consistent with elements in spectrum
+      sbt -J-Xmx12G
+     well not anymore since we now correctly check the LSP is consistent with the SP, and not my own peptide is consistent with elements in spectrum
    */
   def cycloPeptideSequencing(spectrum: Spectrum): Set[Peptide] = {
     var results = Set.empty[Seq[Int]]
     val basicAminoAcids: Seq[Int] = masses.intersect(spectrum)
-    var peptides = Seq(Seq.empty[Int])
+    var peptides = Seq(Seq.empty[Int]).par // Do we need parallel?
     //println("Peptides = " + peptides.size)
     while (peptides.nonEmpty) {
       peptides = expand(peptides, basicAminoAcids)
