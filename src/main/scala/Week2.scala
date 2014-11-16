@@ -96,7 +96,6 @@ object Week2
   )
 
   val masses: Seq[Int] = integerMass.map(_._2).toSet.toSeq.sorted
-  //val masses = List(103,137,71,131,114,113,115,99,97).sorted
 
   val reverseGenericCode = geneticCode.groupBy(_._2).filterKeys(!_.isEmpty).mapValues(_.keySet)
 
@@ -120,7 +119,6 @@ object Week2
     }
     r.toString()
   }
-
 
   def countPossiblePatternsTranslatingToPeptide(peptide: String) = {
     @tailrec def countPossiblePatternsTranslatingToPeptideImpl(peptide: String, result: Long): Long = {
@@ -225,106 +223,6 @@ object Week2
     result.sortBy(_._2)
   }
 
-/*
-  def fastLinearSpectrum(peptide: String): Seq[(String, Int)] = {
-    val prefixMass = mutable.Map(0 -> 0)
-    var i = 1
-    while (i <= peptide.length) {
-      prefixMass(i) = prefixMass(i - 1) + integerMass(peptide.charAt(i - 1))
-      i += 1
-    }
-    var linearSpectrum = Seq(("", 0))
-    i = 0
-    while (i < peptide.length) {
-      var j = i + 1
-      while (j <= peptide.length) {
-        //println(s"($i,$j)")
-        linearSpectrum = linearSpectrum :+  (peptide.substring(i, j), prefixMass(j) - prefixMass(i))
-        j += 1
-      }
-      i += 1
-    }
-    linearSpectrum.sortBy(_._2)
-  }
-
-  def fastLinearSpectrumNumeric(peptide: Array[Int]): ArrayBuffer[Int] = {
-    val len = peptide.length
-    var peptideMass = 0
-    val prefixMass = ((0 +: peptide).map { e =>
-      peptideMass += e
-      peptideMass
-    }).toArray
-
-    val linearSpectrum = ArrayBuffer(0)
-    var i = 0
-    while (i < len) {
-      var j = i + 1
-      while (j <= len) {
-        //println(s"($i,$j)")
-        linearSpectrum.append(prefixMass(j) - prefixMass(i))
-        j += 1
-      }
-      i += 1
-    }
-    linearSpectrum.sorted
-  }
-
-  def fastCyclicSpectrum(peptide: String): Seq[(String, Int)] = {
-    val helper = peptide + peptide
-    val prefixMass = mutable.Map(0 -> 0)
-    var i = 1
-    while (i <= peptide.length) {
-      prefixMass(i) = prefixMass(i - 1) + integerMass(peptide.charAt(i - 1))
-      i += 1
-    }
-    val peptideMass = prefixMass(peptide.length)
-    var cyclicSpectrum = Seq(("", 0))
-    i = 0
-    while (i < peptide.length) {
-      var j = i + 1
-      while (j <= peptide.length) {
-        //println(s"($i,$j)")
-        cyclicSpectrum = cyclicSpectrum :+  (peptide.substring(i, j), prefixMass(j) - prefixMass(i))
-        if ((i > 0) && (j < peptide.length)) {
-          cyclicSpectrum = cyclicSpectrum :+  (helper.substring(j, peptide.length + i), peptideMass - (prefixMass(j) - prefixMass(i)))
-        }
-        j += 1
-      }
-      i += 1
-    }
-    cyclicSpectrum.sortBy(_._2)
-  }
-
-  def fastCyclicSpectrumNumeric(peptide: Array[Int]): ArrayBuffer[Int] = {
-    val len = peptide.length
-
-    var peptideMass = 0
-    val prefixMass = ((0 +: peptide).map { e =>
-      peptideMass += e
-      peptideMass
-    }).toArray
-
-    //val peptideMass = prefixMass(len)
-    val cyclicSpectrum = ArrayBuffer(0)
-    var i = 0
-    while (i < len) {
-      var j = i + 1
-      while (j <= len) {
-        //println(s"($i,$j)")
-        val currentVal = prefixMass(j) - prefixMass(i)
-        cyclicSpectrum.append(currentVal)
-        //cyclicSpectrum = cyclicSpectrum :+  ()
-        if ((i > 0) && (j < len)) {
-          cyclicSpectrum.append(peptideMass - currentVal)
-        }
-        j += 1
-      }
-      i += 1
-    }
-    cyclicSpectrum.sorted
-  }
-*/
-
   type Peptide = Seq[Int]
   type Spectrum = Seq[Int]
 
@@ -359,12 +257,12 @@ object Week2
     (cyclicSpectrum.sorted, linearSpectrum)
   }
 
-  private final def consistent(peptide: Peptide, spectrum: Spectrum): Boolean = {
+  private final def isConsistentWith(peptide: Peptide, spectrum: Spectrum): Boolean = {
     peptide.diff(spectrum).isEmpty
   }
 
   private final def expand(peptides: ParSeq[Peptide], massesToUse: Seq[Int] = masses): ParSeq[Peptide] = {
-    // TODO can wqe elegantly make this work for Seq and ParSeq
+    // TODO can we elegantly make this work for Seq and ParSeq
     for {
       peptide <- peptides
       mass <- massesToUse
@@ -375,13 +273,13 @@ object Week2
       sbt -J-Xmx12G
      well not anymore since we now correctly check the LSP is consistent with the SP, and not my own peptide is consistent with elements in spectrum
    */
-  def cycloPeptideSequencing(spectrum: Spectrum): Set[Peptide] = {
+  def cyclopeptideSequencingBranchAndBound(spectrum: Spectrum): Set[Peptide] = {
     var results = Set.empty[Seq[Int]]
-    val basicAminoAcids: Seq[Int] = masses.intersect(spectrum)
-    var peptides = Seq(Seq.empty[Int]).par // Do we need parallel?
+    val basicAminoAcidsInSpectrum: Seq[Int] = masses.intersect(spectrum)
+    var peptides = Seq(Seq.empty[Int]).par // Do we really need parallel? No
     //println("Peptides = " + peptides.size)
     while (peptides.nonEmpty) {
-      peptides = expand(peptides, basicAminoAcids)
+      peptides = expand(peptides, basicAminoAcidsInSpectrum)
       //println("Peptides expanded = " + peptides.size)
 
       peptides = peptides.filter { peptide =>
@@ -390,7 +288,7 @@ object Week2
           results += peptide
           //print(peptide.mkString("-") + " ")
           false
-        } else consistent(linearSpectrum, spectrum)
+        } else isConsistentWith(linearSpectrum, spectrum)
       }
     }
     results
@@ -439,8 +337,8 @@ object Week2
       }
     }
     result.sorted
-/*
 
+    /*
     var sortedSpectrum = spectrum.sorted
     var i = 0
     var result = Seq.empty[Int];
@@ -515,7 +413,7 @@ object Week2
 //  val spectrum =  "0 97 97 99 101 103 196 198 198 200 202 295 297 299 299 301 394 396 398 400 400 497".split(" ").map(_.toInt)
 //  val spectrum =  "0 101 103 113 113 113 115 128 128 131 137 163 204 216 226 228 228 244 256 259 264 265 300 317 331 341 341 357 367 372 387 393 401 428 432 444 454 472 480 485 500 504 524 529 545 556 557 585 595 600 613 617 632 637 657 658 687 688 708 713 728 732 745 750 760 788 789 800 816 821 841 845 860 865 873 891 901 913 917 944 952 958 973 978 988 1004 1004 1014 1028 1045 1080 1081 1086 1089 1101 1117 1117 1119 1129 1141 1182 1208 1214 1217 1217 1230 1232 1232 1232 1242 1244 1345".split(" ").map(_.toInt)
 //  val spectrum =  "0 57 57 114 114 171 171 228".split(" ").map(_.toInt)
-  println(s"cycloPeptideSequencing({" + spectrum.mkString(",") + "}) = " + cycloPeptideSequencing(spectrum).map(_.mkString("-")).mkString(" "))
+  println(s"cyclopeptideSequencingBranchAndBound({" + spectrum.mkString(",") + "}) = " + cyclopeptideSequencingBranchAndBound(spectrum).map(_.mkString("-")).mkString(" "))
 
 //  val spectrum = "0 71 99 101 103 128 129 199 200 204 227 230 231 298 303 328 330 332 333".split(" ").map(_.toInt)
 //  var peptide = "TCE"

@@ -1,6 +1,5 @@
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.io.Source
 
 object Week1 extends App {
   def patternCount(text: String, pattern: String): Int = {
