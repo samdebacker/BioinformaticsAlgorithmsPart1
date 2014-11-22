@@ -1,4 +1,4 @@
 Bioinformatics Algorithms (Part 1)
 ==================================
 
-Excercises for https://www.coursera.org/course/bioinformatics in Scala
+Excercises for the [UCSD Coursera course Bioinformatics Algorithms Part 1](https://www.coursera.org/course/bioinformatics) in Scala
