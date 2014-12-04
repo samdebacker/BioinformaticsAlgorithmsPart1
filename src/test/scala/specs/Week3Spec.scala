@@ -45,7 +45,7 @@ class Week3Spec extends FeatureSpec {
     }
   }
 
-  feature("count profile consensus entropy") {
+  feature("count profile consensus score entropy") {
     val NFkBmotifs =
       """TCGGGGgTTTtt
         |cCGGtGAcTTaC
@@ -72,6 +72,9 @@ class Week3Spec extends FeatureSpec {
     }
     scenario("consensus") {
       consensus(NFkBmotifs) shouldBe "TCGGGGATTTCC"
+    }
+    scenario("score") {
+      score(NFkBmotifs) shouldBe 30
     }
     scenario("entropy") {
       entropy(NFkBmotifs) shouldBe (9.91629 +- 0.00001)

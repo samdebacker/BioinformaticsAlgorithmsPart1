@@ -63,14 +63,23 @@ object Week3 {
     s.toString()
   }
 
-  def entropy(v: Vector[Double]): Double = {
-    def log2(x: Double): Double = log(x) / log(2)
-    v.fold(0.0) { case (acc, el) =>
-      acc - (if (el == 0.0) 0.0 else el * log2(el))
-    }
+  def score(motifs: IndexedSeq[DNA]): Int = {
+    val c = consensus(motifs)
+    val k = motifs.head.length
+    (for {
+      motif <- motifs
+      el <- motif.zip(c)
+      if (el._1 != el._2)
+    } yield 1).sum
   }
 
   def entropy(motifs: IndexedSeq[DNA]): Double = {
+    def entropy(v: Vector[Double]): Double = {
+      def log2(x: Double): Double = log(x) / log(2)
+      v.fold(0.0) { (acc, el) =>
+        acc - (if (el == 0.0) 0.0 else el * log2(el))
+      }
+    }
     val p = profile(motifs)
     val k = motifs.head.length
     (for {
