@@ -86,4 +86,18 @@ object Week3 {
       j <- 0 until k
     } yield entropy(p(::,j))).sum
   }
+
+  def distance(pattern: String, dna: IndexedSeq[DNA]): Int = {
+    val k = pattern.length
+    (dna.map { d =>
+      (for {
+         i <- 0 to (d.length - k)
+         kMer = d.substring(i, i + k)
+      } yield Week1.hammingDistance(pattern, kMer)).min
+    }).sum
+  }
+
+  def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int) = {
+
+  }
 }
