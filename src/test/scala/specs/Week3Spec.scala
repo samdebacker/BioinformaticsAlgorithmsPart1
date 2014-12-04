@@ -1,5 +1,6 @@
 package specs
 
+import breeze.linalg.DenseMatrix
 import org.scalatest.Matchers._
 import org.scalatest._
 import weeks.Week3._
@@ -41,6 +42,36 @@ class Week3Spec extends FeatureSpec {
       //info("Result " + result.mkString(" "))
       val expectedResult = Set("TGAAA", "TGATA", "TGAGA", "TGACA", "GAGAA")
       result shouldBe expectedResult
+    }
+  }
+
+  feature("count profile consensus") {
+    val motifs =
+      """TCGGGGgTTTtt
+        |cCGGtGAcTTaC
+        |aCGGGGATTTtC
+        |TtGGGGAcTTtt
+        |aaGGGGAcTTCC
+        |TtGGGGAcTTCC
+        |TCGGGGATTcat
+        |TCGGGGATTcCt
+        |TaGGGGAacTaC
+        |TCGGGtATaaCC""".stripMargin.toUpperCase.split("\\s").toIndexedSeq
+    val expectedResult: DenseMatrix[Double] = DenseMatrix(
+      (2.0d,  2.0d,  0.0d,  0.0d,  0.0d,  0.0d,  9.0d,  1.0d,  1.0d,  1.0d,  3.0d,  0.0d),
+      (1.0d,  6.0d,  0.0d,  0.0d,  0.0d,  0.0d,  0.0d,  4.0d,  1.0d,  2.0d,  4.0d,  6.0d),
+      (0.0d,  0.0d, 10.0d, 10.0d,  9.0d,  9.0d,  1.0d,  0.0d,  0.0d,  0.0d,  0.0d,  0.0d),
+      (7.0d,  2.0d,  0.0d,  0.0d,  1.0d,  1.0d,  0.0d,  5.0d,  8.0d,  7.0d,  3.0d,  4.0d)
+    )
+
+    scenario("count") {
+      count(motifs) shouldBe expectedResult
+    }
+    scenario("profile") {
+      profile(motifs) shouldBe (expectedResult :/ motifs.size.toDouble)
+    }
+    scenario("consensus") {
+      consensus(motifs) shouldBe "TCGGGGATTTCC"
     }
   }
 }
