@@ -42,6 +42,7 @@ object Week3 {
   }
 
   type Profile = DenseMatrix[Double]
+
   def profile(motifs: IndexedSeq[DNA]): Profile = {
     val t = motifs.length
     val c = count(motifs)
@@ -116,13 +117,16 @@ object Week3 {
     }).sum
   }
 
-  def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int): String = {
-    (for {
+  def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int, all: Boolean = false): Set[String] = {
+    val DPs = for {
       i <- 0 until pow(4, k).toInt
       pattern = Week1.numberToPattern(i, k)
       d = distance(pattern, dna)
-    } yield (d, pattern))
-      .min(Ordering[Int].on[(Int,_)](_._1))
-      ._2
+    } yield (d, pattern)
+    val minDistance = DPs.min(Ordering[Int].on[(Int,_)](_._1))._1
+    if (all)
+      DPs.filter(_._1 == minDistance).map(_._2).toSet
+    else
+      DPs.find(_._1 == minDistance).map(_._2).toSet
   }
 }

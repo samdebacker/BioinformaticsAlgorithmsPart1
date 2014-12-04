@@ -82,8 +82,9 @@ class Week3Spec extends FeatureSpec {
       )
       val c = consensi(p)
       c shouldBe Set("ACGTTA", "ACGTGA", "AAGTTA", "AGGCGA", "AAGTGA", "ACGCGA", "AAGCTA", "AGGTTA", "AGGCTA", "ACGCTA", "AGGTGA", "AAGCGA")
-      c.intersect(Set("AAGTGA", "AAGAGA", "ATGCTA", "TCGCGA", "AGGCTA", "ACGTTA")) shouldBe Set("ACGTTA", "AAGTGA", "AGGCTA")
-    }
+      c & Set("AAGTGA", "AAGAGA", "ATGCTA", "TCGCGA", "AGGCTA", "ACGTTA") shouldBe Set("ACGTTA", "AAGTGA", "AGGCTA")
+      c & Set("ACGTTA", "AGGTGA", "AAGAGA", "AGGTCA", "ACGCGA", "ATGCTA") shouldBe Set("ACGTTA", "ACGCGA", "AGGTGA")
+     }
     scenario("score") {
       score(NFkBmotifs) shouldBe 30
     }
@@ -149,7 +150,7 @@ class Week3Spec extends FeatureSpec {
           |CGTCAGCGCCTG
           |GCTGAGCACCGG
           |AGTACGGGACAG""".stripMargin.split("\\s").toIndexedSeq
-      bruteForceMedianString(dna, k) shouldBe "ACG"
+      bruteForceMedianString(dna, k) shouldBe Set("ACG")
     }
     scenario("bruteForceMedianString extra dataset") {
       val k = 6
@@ -164,7 +165,7 @@ class Week3Spec extends FeatureSpec {
           |GAAAAAACCTATAAAGTCCACTCTTTGCGGCGGCGAGCCATA
           |CCACGTCCGTTACTCCGTCGCCGTCAGCGATAATGGGATGAG
           |CCAAAGCTGCGAAATAACCATACTCTGCTCAGGAGCCCGATG""".stripMargin.split("\\s").toIndexedSeq
-      bruteForceMedianString(dna, k) shouldBe "CGGCGA"
+      bruteForceMedianString(dna, k) shouldBe Set("CGGCGA")
     }
     scenario("bruteForceMedianString interactive quizz") {
       val k = 6
@@ -179,7 +180,17 @@ class Week3Spec extends FeatureSpec {
           |TAACCCTGCAGTCTATGCAGTCAAACGAGCAATGACTTTCAT
           |TAGTGAAGTCAATGTCCAGACGAGCTTGACAAAGGCGGTAAA
           |CACCGAAAGCTTGTTGTCTCTGTAACCGCCGCTCGGAGTCCA""".stripMargin.split("\\s").toIndexedSeq
-      bruteForceMedianString(dna, k) shouldBe "AGTCAA"
+      bruteForceMedianString(dna, k) shouldBe Set("AGTCAA")
+    }
+    scenario("bruteForceMedianString quizz") {
+      val k = 7
+      val dna =
+        """CTCGATGAGTAGGAAAGTAGTTTCACTGGGCGAACCACCCCGGCGCTAATCCTAGTGCCC
+          |GCAATCCTACCCGAGGCCACATATCAGTAGGAACTAGAACCACCACGGGTGGCTAGTTTC
+          |GGTGTTGAACCACGGGGTTAGTTTCATCTATTGTAGGAATCGGCTTCAAATCCTACACAG""".stripMargin.split("\\s").toIndexedSeq
+      val m = bruteForceMedianString(dna, k, all = true)
+      m shouldBe Set("AATCCTA", "GAACCAC", "GTAGGAA", "TAGTTTC")
+      m & Set("CGTGTAA", "TAGTTTC", "ATAACGG", "AATCCTA", "TCTGAAG", "AACGCTG") shouldBe Set("TAGTTTC", "AATCCTA")
     }
   }
 }
