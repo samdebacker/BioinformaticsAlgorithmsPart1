@@ -1,9 +1,8 @@
+import Week3._
 import org.scalatest.Matchers._
 import org.scalatest._
 
 class Week3Spec extends FeatureSpec {
-  import Week3._
-
   feature("expectedNumberOfOccurences") {
     scenario("interactive quiz") {
       expectedNumberOfOccurences(9, 1000, 500) shouldBe (1.8921 +- 0.0001)
@@ -37,7 +36,7 @@ class Week3Spec extends FeatureSpec {
       val k = 5
       val d = 1
       val result = motifEnumeration(dna, k, d)
-      info("Result " + result.mkString(" "))
+      //info("Result " + result.mkString(" "))
       val expectedResult = Set("TGAAA", "TGATA", "TGAGA", "TGACA", "GAGAA")
       result shouldBe expectedResult
     }
