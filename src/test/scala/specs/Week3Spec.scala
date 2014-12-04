@@ -73,6 +73,17 @@ class Week3Spec extends FeatureSpec {
     scenario("consensus") {
       consensus(NFkBmotifs) shouldBe "TCGGGGATTTCC"
     }
+    scenario("consensi quizz") {
+      val p: Profile = DenseMatrix(
+        (0.4,  0.3,  0.0,  0.1,  0.0,  0.9),
+        (0.2,  0.3,  0.0,  0.4,  0.0,  0.1),
+        (0.1,  0.3,  1.0,  0.1,  0.5,  0.0),
+        (0.3,  0.1,  0.0,  0.4,  0.5,  0.0)
+      )
+      val c = consensi(p)
+      c shouldBe Set("ACGTTA", "ACGTGA", "AAGTTA", "AGGCGA", "AAGTGA", "ACGCGA", "AAGCTA", "AGGTTA", "AGGCTA", "ACGCTA", "AGGTGA", "AAGCGA")
+      c.intersect(Set("AAGTGA", "AAGAGA", "ATGCTA", "TCGCGA", "AGGCTA", "ACGTTA")) shouldBe Set("ACGTTA", "AAGTGA", "AGGCTA")
+    }
     scenario("score") {
       score(NFkBmotifs) shouldBe 30
     }

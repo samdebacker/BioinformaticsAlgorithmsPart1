@@ -2,6 +2,7 @@ package weeks
 
 import breeze.linalg._
 
+import scala.annotation.tailrec
 import scala.math._
 
 object Week3 {
@@ -40,20 +41,38 @@ object Week3 {
     m
   }
 
-  def profile(motifs: IndexedSeq[DNA]): DenseMatrix[Double] = {
+  type Profile = DenseMatrix[Double]
+  def profile(motifs: IndexedSeq[DNA]): Profile = {
     val t = motifs.length
     val c = count(motifs)
     c :/ t.toDouble
   }
 
-  def consensus(motifs: IndexedSeq[DNA]): String = {
-    def fromIndex(index: Int) = index match {
-      case 0 => 'A'
-      case 1 => 'C'
-      case 2 => 'G'
-      case 3 => 'T'
-      case _ => ???
+  def fromIndex(index: Int) = index match {
+    case 0 => 'A'
+    case 1 => 'C'
+    case 2 => 'G'
+    case 3 => 'T'
+    case _ => ???
+  }
+
+  def consensi(p: Profile): Set[String] = {
+    @tailrec def consensi_(p: Profile, result: Set[String]): Set[String] = {
+      if (p.cols == 0) result
+      else {
+        val m = breeze.linalg.max(p(::,0))
+        val s = for {
+          r <- result
+          i <- 0 to 3
+          if p(i,0) == m
+        } yield r + fromIndex(i)
+        consensi_(p(::,1 until p.cols), s)
+      }
     }
+    consensi_(p, Set("")) - ""
+  }
+
+  def consensus(motifs: IndexedSeq[DNA]): String = {
     val p = profile(motifs)
     val k = motifs.head.length
     val s = new StringBuilder
