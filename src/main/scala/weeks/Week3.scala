@@ -62,4 +62,19 @@ object Week3 {
     }
     s.toString()
   }
+
+  def entropy(v: Vector[Double]): Double = {
+    def log2(x: Double): Double = log(x) / log(2)
+    v.fold(0.0) { case (acc, el) =>
+      acc - (if (el == 0.0) 0.0 else el * log2(el))
+    }
+  }
+
+  def entropy(motifs: IndexedSeq[DNA]): Double = {
+    val p = profile(motifs)
+    val k = motifs.head.length
+    (for {
+      j <- 0 until k
+    } yield entropy(p(::,j))).sum
+  }
 }

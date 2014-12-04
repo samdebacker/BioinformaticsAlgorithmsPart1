@@ -45,8 +45,8 @@ class Week3Spec extends FeatureSpec {
     }
   }
 
-  feature("count profile consensus") {
-    val motifs =
+  feature("count profile consensus entropy") {
+    val NFkBmotifs =
       """TCGGGGgTTTtt
         |cCGGtGAcTTaC
         |aCGGGGATTTtC
@@ -65,13 +65,16 @@ class Week3Spec extends FeatureSpec {
     )
 
     scenario("count") {
-      count(motifs) shouldBe expectedResult
+      count(NFkBmotifs) shouldBe expectedResult
     }
     scenario("profile") {
-      profile(motifs) shouldBe (expectedResult :/ motifs.size.toDouble)
+      profile(NFkBmotifs) shouldBe (expectedResult :/ NFkBmotifs.size.toDouble)
     }
     scenario("consensus") {
-      consensus(motifs) shouldBe "TCGGGGATTTCC"
+      consensus(NFkBmotifs) shouldBe "TCGGGGATTTCC"
+    }
+    scenario("entropy") {
+      entropy(NFkBmotifs) shouldBe (9.91629 +- 0.00001)
     }
   }
 }
