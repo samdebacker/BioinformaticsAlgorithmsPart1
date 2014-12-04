@@ -126,7 +126,7 @@ object Week1 extends App {
     patternToNumberImpl(pattern, 0)
   }
 
-  private def numberToPattern(n: Int, l: Int): String = {
+  def numberToPattern(n: Int, l: Int): String = {
     @tailrec def numberToPatternImpl(n: Int, result: List[Char]): String = {
       if (result.length == l) result.mkString
       else numberToPatternImpl(n / 4, alpha(n % 4) :: result)

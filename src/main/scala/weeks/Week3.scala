@@ -97,7 +97,13 @@ object Week3 {
     }).sum
   }
 
-  def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int) = {
-
+  def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int): String = {
+    (for {
+      i <- 0 until pow(4, k).toInt
+      pattern = Week1.numberToPattern(i, k)
+      d = distance(pattern, dna)
+    } yield (d, pattern))
+      .min(Ordering[Int].on[(Int,_)](_._1))
+      ._2
   }
 }
