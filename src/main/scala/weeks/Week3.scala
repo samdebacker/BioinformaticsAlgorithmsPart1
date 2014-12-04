@@ -1,3 +1,5 @@
+package weeks
+
 import scala.math._
 
 object Week3 {

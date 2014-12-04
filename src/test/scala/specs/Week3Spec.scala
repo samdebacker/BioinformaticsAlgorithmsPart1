@@ -1,6 +1,8 @@
-import Week3._
+package specs
+
 import org.scalatest.Matchers._
 import org.scalatest._
+import weeks.Week3._
 
 class Week3Spec extends FeatureSpec {
   feature("expectedNumberOfOccurences") {

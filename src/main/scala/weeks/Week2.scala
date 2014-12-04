@@ -1,3 +1,5 @@
+package weeks
+
 import scala.annotation.tailrec
 
 object Week2

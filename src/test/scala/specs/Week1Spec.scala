@@ -1,6 +1,8 @@
-import Week1._
+package specs
+
 import org.scalatest.Matchers._
 import org.scalatest._
+import weeks.Week1._
 
 import scala.io.Source
 
