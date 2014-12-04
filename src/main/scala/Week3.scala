@@ -1,10 +1,16 @@
 import scala.math._
 
 object Week3 {
-  def expectedNumberOfOccurences(k: Int, L: Int, n: Int): Double = (L - k + 1) * pow(.25, k) * n
+  /**
+   * @param k the length of the k-mer
+   * @param n the length of each DNA string
+   * @param t the number of DNA strings
+   * @return
+   */
+  def expectedNumberOfOccurences(k: Int, n: Int, t: Int): Double = (n - k + 1) * pow(.25, k) * t
 
-  type DNA = Set[String]
-  def motifEnumeration(dna: DNA, k: Int, d: Int): Set[String] = {
+  type DNA = String
+  def motifEnumeration(dna: Set[DNA], k: Int, d: Int): Set[String] = {
     for {
       singleDna <- dna
       i <- 0 until (singleDna.length - k)

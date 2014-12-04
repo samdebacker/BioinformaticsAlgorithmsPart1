@@ -30,7 +30,7 @@ class Week3Suite extends FunSuite {
         |TGAGAACGGAGTACTGGGGTCACAT
         |TGAAAGAATCTTATTTTCAAAGGGG
         |TGAAACCTAGATAACTCGACTTTGC
-        |CGTAGTGATAAGCTATGAAGCCGTC""".stripMargin.split("\\s").toSet
+        |CGTAGTGATAAGCTATGAAGCCGTC""".stripMargin.split("\\s").toSet[DNA]
     val k = 5
     val d = 1
     val result = motifEnumeration(dna, k, d)
