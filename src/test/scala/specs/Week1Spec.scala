@@ -33,7 +33,8 @@ class Week1Spec extends FeatureSpec {
     val k = 9
     val expectedResult = Set("TTTTTCTTT")
 
-    ignore("frequentWords") {
+    scenario("frequentWords") {
+      cancel("this algorithm is too slow")
       frequentWords(text, k) shouldBe expectedResult
     }
     scenario("frequentWordsMap") {
@@ -73,6 +74,7 @@ class Week1Spec extends FeatureSpec {
       findClumps(text, k, L, t) shouldBe expectedResult
     }
     ignore("fastFindClumps") {
+      cancel("this algorithm is too slow")
       fastFindClumps(text, k, L, t) shouldBe expectedResult
     }
   }
