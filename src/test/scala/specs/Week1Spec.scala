@@ -6,6 +6,11 @@ import weeks.Week1._
 
 import scala.io.Source
 
+// Run with
+//  testOnly FullSpec -- -l SlowTest
+// to exclude tests that are marked as slow
+object SlowTest extends Tag("SlowTest")
+
 class Week1Spec extends FeatureSpec {
   feature("patternCount") {
     scenario("example") {
@@ -33,8 +38,7 @@ class Week1Spec extends FeatureSpec {
     val k = 9
     val expectedResult = Set("TTTTTCTTT")
 
-    scenario("frequentWords") {
-      cancel("this algorithm is too slow")
+    scenario("frequentWords", SlowTest) {
       frequentWords(text, k) shouldBe expectedResult
     }
     scenario("frequentWordsMap") {
@@ -73,8 +77,7 @@ class Week1Spec extends FeatureSpec {
     scenario("findClumps") {
       findClumps(text, k, L, t) shouldBe expectedResult
     }
-    ignore("fastFindClumps") {
-      cancel("this algorithm is too slow")
+    scenario("fastFindClumps", SlowTest) {
       fastFindClumps(text, k, L, t) shouldBe expectedResult
     }
   }
