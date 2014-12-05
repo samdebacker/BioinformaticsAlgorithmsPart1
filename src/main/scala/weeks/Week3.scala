@@ -131,13 +131,22 @@ object Week3 {
       DPs.find(_._1 == minDistance).map(_._2).toSet
   }
 
-  def probability(string: String, profile: Profile): Double = {
-    @tailrec def probability_(string: String, profile: Profile, result: Double): Double = {
-      if (string.isEmpty || profile.cols == 0)
+  def probability(text: String, profile: Profile): Double = {
+    @tailrec def probability_(text: String, profile: Profile, result: Double): Double = {
+      if (text.isEmpty || profile.cols == 0)
         result
       else
-        probability_(string.tail, profile(::,1 until profile.cols), result * profile(toIndex(string.head),0))
+        probability_(text.tail, profile(::,1 until profile.cols), result * profile(toIndex(text.head),0))
     }
-    probability_(string, profile, 1.0)
+    probability_(text, profile, 1.0)
+  }
+
+  def profileMostProbableKmer(text: String, k: Int, profile: Profile): String = {
+    val PKs = for {
+      i <- 0 until (text.length - k)
+      kMer = text.substring(i, i + k)
+    } yield (probability(kMer,profile), kMer)
+    val max = PKs.max(Ordering[Double].on[(Double,_)](_._1))._1
+    PKs.find(_._1 == max).get._2
   }
 }
