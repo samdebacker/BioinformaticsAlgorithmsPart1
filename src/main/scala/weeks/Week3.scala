@@ -24,14 +24,15 @@ object Week3 {
     } yield neighbour
   }
 
+  def toIndex(nucleotide: Char) = nucleotide match {
+    case 'A' => 0
+    case 'C' => 1
+    case 'G' => 2
+    case 'T' => 3
+    case _ => ???
+  }
+
   def count(motifs: IndexedSeq[DNA]): DenseMatrix[Double] = {
-    def toIndex(nucleotide: Char) = nucleotide match {
-      case 'A' => 0
-      case 'C' => 1
-      case 'G' => 2
-      case 'T' => 3
-      case _ => ???
-    }
     val k = motifs.head.length
     val m = DenseMatrix.zeros[Double](4, k)
     for (motif <- motifs; j <- 0 until motif.size) {
@@ -128,5 +129,15 @@ object Week3 {
       DPs.filter(_._1 == minDistance).map(_._2).toSet
     else
       DPs.find(_._1 == minDistance).map(_._2).toSet
+  }
+
+  def probability(string: String, profile: Profile): Double = {
+    @tailrec def probability_(string: String, profile: Profile, result: Double): Double = {
+      if (string.isEmpty || profile.cols == 0)
+        result
+      else
+        probability_(string.tail, profile(::,1 until profile.cols), result * profile(toIndex(string.head),0))
+    }
+    probability_(string, profile, 1.0)
   }
 }

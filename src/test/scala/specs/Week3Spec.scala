@@ -193,4 +193,21 @@ class Week3Spec extends FeatureSpec {
       m & Set("CGTGTAA", "TAGTTTC", "ATAACGG", "AATCCTA", "TCTGAAG", "AACGCTG") shouldBe Set("TAGTTTC", "AATCCTA")
     }
   }
+
+  def readProfile(profileString: String): Profile = {
+    val a = profileString.stripMargin.split("\\s+").map(_.toDouble)
+    new DenseMatrix(a.length / 4, 4, a).t
+  }
+
+  feature("probability") {
+    scenario("example") {
+      val p = readProfile(
+        """.2  .2   0   0   0   0  .9  .1  .1  .1  .3   0
+          |.1  .6   0   0   0   0   0  .4  .1  .2  .4  .6
+          |0   0   1   1  .9  .9  .1   0   0   0   0   0
+          |.7  .2   0   0  .1  .1   0  .5  .8  .7  .3  .4""")
+      val s = "ACGGGGATTACC"
+      probability(s, p) shouldBe (0.000839808 +- 0.000000001)
+    }
+  }
 }
