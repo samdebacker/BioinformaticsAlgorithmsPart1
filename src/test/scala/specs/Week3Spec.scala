@@ -365,7 +365,7 @@ class Week3Spec extends FeatureSpec {
           |CAATAATATTCG""".stripMargin.split("\\s").toIndexedSeq
       val k = 3
       val t = dna.length
-      greedyMotifSearch(dna, k, t, 1) shouldBe IndexedSeq("TTC", "ATC", "TTC", "ATC", "TTC")
+      greedyMotifSearchWithPseudocounts(dna, k, t) shouldBe IndexedSeq("TTC", "ATC", "TTC", "ATC", "TTC")
     }
     scenario("extra dataset") {
       val dna =
@@ -422,7 +422,7 @@ class Week3Spec extends FeatureSpec {
           |CGTCCCTACACT
           |CTTCGCTTGACT
           |CTTCCCTGAACT""".stripMargin.split("\\s").toIndexedSeq
-      greedyMotifSearch(dna, k, t, 1) shouldBe expectedResult
+      greedyMotifSearchWithPseudocounts(dna, k, t) shouldBe expectedResult
     }
     scenario("interactive quizz") {
       val dna =
@@ -453,7 +453,7 @@ class Week3Spec extends FeatureSpec {
           |ACTTATCCAAACTTGTACTACGTACTGAGCCGGCCCCCCAGATGGGCGACGAGAGGCGCGCCGGAATCGACGTATGCCTAGCGTCGTTACGCATGAAAACGGGTATATTCAAGAAATGCTGTGCCGCGCGTCATGCATTGGGACGGGGTTACAACT""".stripMargin.split("\\s").toIndexedSeq
       val k = 12
       val t = dna.length
-      val result = greedyMotifSearch(dna, k, t, 1)
+      val result = greedyMotifSearchWithPseudocounts(dna, k, t)
       val expectedResult =
         """TACCCAGGTCGG AACCCAGTTGGG AACCCAGATAGG CCCCCAGTTTGG ACCCCAGGTAGG GCCCCAGGTCGG CGCCCAGCTTGG CACCCAGCTTGG GACCCAGATAGG CCCCCAGTTCGG CTCCCAGTTAGG CACCCAGGTGGG ATCCCAGCTGGG AGCCCAGCTGGG ATCCCAGGTTGG GACCCAGGTCGG TGCCCAGGTTGG TCCCCAGTTAGG GACCCAGGTGGG ATCCCAGATAGG ATCCCAGTTCGG ACCCCAGATAGG TTCCCAGATGGG TGCCCAGATCGG CCCCCAGATGGG""".stripMargin.split("\\s").toIndexedSeq
       //println(result.mkString(" "))

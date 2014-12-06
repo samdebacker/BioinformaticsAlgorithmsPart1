@@ -24,13 +24,8 @@ object Week3 {
     } yield neighbour
   }
 
-  def toIndex(nucleotide: Char) = nucleotide match {
-    case 'A' => 0
-    case 'C' => 1
-    case 'G' => 2
-    case 'T' => 3
-    case _ => ???
-  }
+  private val FROM_NUCLEOTIDE_TO_INDEX_CONVERTION = Map('A' -> 0, 'C' -> 1, 'G' -> 2, 'T' -> 3)
+  def toIndex(nucleotide: Char): Int = FROM_NUCLEOTIDE_TO_INDEX_CONVERTION(nucleotide)
 
   def count(motifs: IndexedSeq[DNA]): DenseMatrix[Double] = {
     val k = motifs.head.length
@@ -46,17 +41,12 @@ object Week3 {
 
   def profile(motifs: IndexedSeq[DNA], addCount: Int = 0): Profile = {
     val t = motifs.length
-    val c = count(motifs) :+ (addCount.toDouble)
+    val c: Profile = count(motifs) :+ addCount.toDouble
     c :/ t.toDouble
   }
 
-  def fromIndex(index: Int) = index match {
-    case 0 => 'A'
-    case 1 => 'C'
-    case 2 => 'G'
-    case 3 => 'T'
-    case _ => ???
-  }
+  private val FROM_INDEX_TO_NUCLEOTIDE_CONVERTION = IndexedSeq('A', 'C', 'G', 'T')
+  def fromIndex(index: Int): Char = FROM_INDEX_TO_NUCLEOTIDE_CONVERTION(index)
 
   def consensi(p: Profile): Set[String] = {
     @tailrec def consensi_(p: Profile, result: Set[String]): Set[String] = {
@@ -159,7 +149,7 @@ object Week3 {
   }
 
   // http://www.mrgraeme.co.uk/greedy-motif-search/
-  def greedyMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int, addCount: Int = 0): IndexedSeq[String] = {
+  private def greedyMotifSearch_(addCount: Int)(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
     val allMotifs = kMers(dna.head, k).map { kMer =>
       val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) =>
         acc :+ profileMostProbableKmer(text, k, profile(acc, addCount))
@@ -170,4 +160,7 @@ object Week3 {
     // CAREFUL minBy uses LT comparison, while min uses LTEQ comparison! and the minBy looks nicer!
     //allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
   }
+
+  val greedyMotifSearch: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] = greedyMotifSearch_(0)
+  val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] =  greedyMotifSearch_(1)
 }
