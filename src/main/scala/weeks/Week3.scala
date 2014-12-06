@@ -143,11 +143,10 @@ object Week3 {
 
   def profileMostProbableKmer(text: String, k: Int, profile: Profile): String = {
     val PKs = for {
-      i <- 0 until (text.length - k)
+      i <- 0 to (text.length - k)
       kMer = text.substring(i, i + k)
     } yield (probability(kMer,profile), kMer)
-    val max = PKs.max(Ordering[Double].on[(Double,_)](_._1))._1
-    PKs.find(_._1 == max).get._2
+    PKs.maxBy(_._1)._2 // CAREFUL maxBy uses GT comparison, while max uses GTEQ comparison! and the maxBy looks nicer!
   }
 
   // http://www.mrgraeme.co.uk/greedy-motif-search/
@@ -167,9 +166,7 @@ object Week3 {
       }
       (motifs, score(motifs))
     }
-    allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
-    // Strictly speaking it should be the 1st min motif
-//        val minScore = allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._2
-//        allMotifs.find(_._2 == minScore).get._1
+    allMotifs.minBy(_._2)._1 // CAREFUL minBy uses LT comparison, while min uses LTEQ comparison! and the minBy looks nicer!
+    //allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
   }
 }
