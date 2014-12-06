@@ -6,11 +6,6 @@ import weeks.Week1._
 
 import scala.io.Source
 
-// Run with
-//  testOnly FullSpec -- -l SlowTest
-// to exclude tests that are marked as slow
-object SlowTest extends Tag("SlowTest")
-
 class Week1Spec extends FeatureSpec {
   feature("patternCount") {
     scenario("example") {

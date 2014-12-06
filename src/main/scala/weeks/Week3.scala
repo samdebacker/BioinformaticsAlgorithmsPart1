@@ -15,13 +15,13 @@ object Week3 {
   def expectedNumberOfOccurences(k: Int, n: Int, t: Int): Double = (n - k + 1) * pow(.25, k) * t
 
   type DNA = String
-  def motifEnumeration(dna: Set[DNA], k: Int, d: Int): Set[String] = {
-    for {
+  def motifEnumeration(dna: IndexedSeq[DNA], k: Int, d: Int): Set[String] = {
+    (for {
       singleDna <- dna
       i <- 0 until (singleDna.length - k)
       kMer = singleDna.substring(i, i + k)
       neighbour <- Week1.neighbours(kMer, d) if dna.forall(Week1.countApproxPattern(_, neighbour, d) > 0)
-    } yield neighbour
+    } yield neighbour).toSet
   }
 
   private val FROM_NUCLEOTIDE_TO_INDEX_CONVERTION = Map('A' -> 0, 'C' -> 1, 'G' -> 2, 'T' -> 3)
