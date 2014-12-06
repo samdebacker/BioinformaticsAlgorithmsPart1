@@ -90,7 +90,7 @@ object Week3 {
     (for {
       motif <- motifs
       el <- motif.zip(c)
-      if (el._1 != el._2)
+      if el._1 != el._2
     } yield 1).sum
   }
 
@@ -110,12 +110,12 @@ object Week3 {
 
   def distance(pattern: String, dna: IndexedSeq[DNA]): Int = {
     val k = pattern.length
-    (dna.map { d =>
+    dna.map { d =>
       (for {
          i <- 0 to (d.length - k)
          kMer = d.substring(i, i + k)
       } yield Week1.hammingDistance(pattern, kMer)).min
-    }).sum
+    }.sum
   }
 
   def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int, all: Boolean = false): Set[String] = {
@@ -148,5 +148,28 @@ object Week3 {
     } yield (probability(kMer,profile), kMer)
     val max = PKs.max(Ordering[Double].on[(Double,_)](_._1))._1
     PKs.find(_._1 == max).get._2
+  }
+
+  // http://www.mrgraeme.co.uk/greedy-motif-search/
+  def greedyMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
+    def kMers(text: DNA): IndexedSeq[DNA] = {
+      @tailrec def kMers_(text: String, result: IndexedSeq[DNA]): IndexedSeq[DNA] = {
+        if (text.length < k)
+          result
+        else
+          kMers_(text.tail, result :+ text.take(k))
+      }
+      kMers_(text, IndexedSeq.empty[DNA])
+    }
+    val allMotifs = kMers(dna.head).map { kMer =>
+      val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) =>
+        acc :+ profileMostProbableKmer(text, k, profile(acc))
+      }
+      (motifs, score(motifs))
+    }
+    allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
+    // Strictly speaking it should be the 1st min motif
+    //    val minScore = allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._2
+    //    allMotifs.find(_._2 == minScore).get._1
   }
 }
