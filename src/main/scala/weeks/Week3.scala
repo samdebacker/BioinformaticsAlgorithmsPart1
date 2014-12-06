@@ -114,11 +114,9 @@ object Week3 {
       pattern = Week1.numberToPattern(i, k)
       d = distance(pattern, dna)
     } yield (d, pattern)
-    val minDistance = DPs.min(Ordering[Int].on[(Int,_)](_._1))._1
-    if (all)
-      DPs.filter(_._1 == minDistance).map(_._2).toSet
-    else
-      DPs.find(_._1 == minDistance).map(_._2).toSet
+
+    val minimalDP = DPs.minBy(_._1)
+    (if (all) DPs.filter(_._1 == minimalDP._1) else Seq(minimalDP)).map(_._2).toSet
   }
 
   def probability(text: String, profile: Profile): Double = {
