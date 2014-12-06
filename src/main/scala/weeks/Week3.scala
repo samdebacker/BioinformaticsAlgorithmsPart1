@@ -44,9 +44,9 @@ object Week3 {
 
   type Profile = DenseMatrix[Double]
 
-  def profile(motifs: IndexedSeq[DNA]): Profile = {
+  def profile(motifs: IndexedSeq[DNA], addCount: Int = 0): Profile = {
     val t = motifs.length
-    val c = count(motifs)
+    val c = count(motifs) :+ (addCount.toDouble)
     c :/ t.toDouble
   }
 
@@ -151,7 +151,7 @@ object Week3 {
   }
 
   // http://www.mrgraeme.co.uk/greedy-motif-search/
-  def greedyMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
+  def greedyMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int, addCount: Int = 0): IndexedSeq[String] = {
     def kMers(text: DNA): IndexedSeq[DNA] = {
       @tailrec def kMers_(text: String, result: IndexedSeq[DNA]): IndexedSeq[DNA] = {
         if (text.length < k)
@@ -163,13 +163,13 @@ object Week3 {
     }
     val allMotifs = kMers(dna.head).map { kMer =>
       val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) =>
-        acc :+ profileMostProbableKmer(text, k, profile(acc))
+        acc :+ profileMostProbableKmer(text, k, profile(acc, addCount))
       }
       (motifs, score(motifs))
     }
     allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
     // Strictly speaking it should be the 1st min motif
-    //    val minScore = allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._2
-    //    allMotifs.find(_._2 == minScore).get._1
+//        val minScore = allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._2
+//        allMotifs.find(_._2 == minScore).get._1
   }
 }
