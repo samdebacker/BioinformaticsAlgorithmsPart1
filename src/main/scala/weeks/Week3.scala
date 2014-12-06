@@ -141,32 +141,33 @@ object Week3 {
     probability_(text, profile, 1.0)
   }
 
+  def kMers(text: DNA, k: Int): IndexedSeq[DNA] = {
+    @tailrec def kMers_(text: String, result: IndexedSeq[DNA]): IndexedSeq[DNA] = {
+      if (text.length < k)
+        result
+      else
+        kMers_(text.tail, result :+ text.take(k))
+    }
+    kMers_(text, IndexedSeq.empty[DNA])
+  }
+
   def profileMostProbableKmer(text: String, k: Int, profile: Profile): String = {
-    val PKs = for {
-      i <- 0 to (text.length - k)
-      kMer = text.substring(i, i + k)
-    } yield (probability(kMer,profile), kMer)
-    PKs.maxBy(_._1)._2 // CAREFUL maxBy uses GT comparison, while max uses GTEQ comparison! and the maxBy looks nicer!
+    kMers(text, k).map { kMer =>
+      (probability(kMer, profile), kMer)
+    }.maxBy(_._1)._2
+    // CAREFUL maxBy uses GT comparison, while max uses GTEQ comparison! and the maxBy looks nicer!
   }
 
   // http://www.mrgraeme.co.uk/greedy-motif-search/
   def greedyMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int, addCount: Int = 0): IndexedSeq[String] = {
-    def kMers(text: DNA): IndexedSeq[DNA] = {
-      @tailrec def kMers_(text: String, result: IndexedSeq[DNA]): IndexedSeq[DNA] = {
-        if (text.length < k)
-          result
-        else
-          kMers_(text.tail, result :+ text.take(k))
-      }
-      kMers_(text, IndexedSeq.empty[DNA])
-    }
-    val allMotifs = kMers(dna.head).map { kMer =>
+    val allMotifs = kMers(dna.head, k).map { kMer =>
       val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) =>
         acc :+ profileMostProbableKmer(text, k, profile(acc, addCount))
       }
       (motifs, score(motifs))
     }
-    allMotifs.minBy(_._2)._1 // CAREFUL minBy uses LT comparison, while min uses LTEQ comparison! and the minBy looks nicer!
+    allMotifs.minBy(_._2)._1
+    // CAREFUL minBy uses LT comparison, while min uses LTEQ comparison! and the minBy looks nicer!
     //allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
   }
 }
