@@ -188,4 +188,43 @@ object Week3 {
         overalBestMotifs
     }._1
   }
+
+  def random(prob: Double*): Int = {
+    val totalProb = prob.sum
+    val roll = Random.nextDouble() * totalProb
+    @tailrec def random_(v: Double, prob: Seq[Double], result: Int): Int = {
+      if (prob.isEmpty || v <= prob.head) result
+      else random_(v - prob.head, prob.tail, result + 1)
+    }
+    random_(roll, prob, 0)
+  }
+
+  def profileRandomlyGeneratedKmer(text: String, k: Int, profile: Profile): String = {
+    val km = kMers(text, k)
+    val probs = km.map(probability(_, profile))
+    println(probs)
+    val chosenIndex = random(probs: _*)
+    //println(" -> " + km(chosenIndex) + s"($chosenIndex)")
+    km(chosenIndex)
+  }
+
+  def gibbsSampler(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int): IndexedSeq[String] = {
+    val startMotifs = dna.map { text =>
+      text.drop(Random.nextInt(text.length - k + 1)).take(k)
+    }
+    (1 to N).foldLeft((startMotifs, score(startMotifs))) { (bestMotifs, _) =>
+      val i = Random.nextInt(t)
+      //print(bestMotifs + " " + i)
+      val (front, back) = bestMotifs._1.splitAt(i)
+      //print(" " + (front ++ back.tail))
+      val p = profile(front ++ back.tail)
+      println(p)
+      val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, p)) ++ back.tail
+      val newScore = score(newMotifs)
+      if (newScore < bestMotifs._2)
+        (newMotifs, newScore)
+      else
+        bestMotifs
+    }._1
+  }
 }
