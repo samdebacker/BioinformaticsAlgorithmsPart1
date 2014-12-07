@@ -4,6 +4,7 @@ import breeze.linalg._
 
 import scala.annotation.tailrec
 import scala.math._
+import scala.util.Random
 
 object Week3 {
   /**
@@ -76,12 +77,9 @@ object Week3 {
 
   def score(motifs: IndexedSeq[DNA]): Int = {
     val c = consensus(motifs)
-    val k = motifs.head.length
-    (for {
-      motif <- motifs
-      el <- motif.zip(c)
-      if el._1 != el._2
-    } yield 1).sum
+    motifs.foldLeft(0) { (d, text) =>
+      d + Week1.hammingDistance(c, text)
+    }
   }
 
   def entropy(motifs: IndexedSeq[DNA]): Double = {
@@ -161,4 +159,33 @@ object Week3 {
 
   val greedyMotifSearch: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] = greedyMotifSearch_(0)
   val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] =  greedyMotifSearch_(1)
+
+  def randomizedMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
+    def motifs(profile: Profile, dna: IndexedSeq[DNA]): IndexedSeq[String] = {
+      dna.map(profileMostProbableKmer(_, k, profile))
+    }
+
+    (1 to 1000).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { (overalBestMotifs, _) =>
+      var currentMotifs = dna.map { text =>
+        text.drop(Random.nextInt(text.length - k + 1)).take(k)
+      }
+      var bestMotifs = (currentMotifs, score(currentMotifs))
+      var continue = true
+      while (continue) {
+        val currentProfile = profile(currentMotifs, 1)
+        currentMotifs = motifs(currentProfile, dna)
+        val currentScore = score(currentMotifs)
+        if (currentScore < bestMotifs._2) {
+          bestMotifs = (currentMotifs, currentScore)
+          //println("Current: " + bestMotifs)
+        } else
+          continue = false
+      }
+      if (bestMotifs._2 < overalBestMotifs._2) {
+        //println("Overal: " + bestMotifs)
+        bestMotifs
+      } else
+        overalBestMotifs
+    }._1
+  }
 }
