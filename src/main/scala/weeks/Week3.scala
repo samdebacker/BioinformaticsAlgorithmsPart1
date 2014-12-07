@@ -201,30 +201,33 @@ object Week3 {
 
   def profileRandomlyGeneratedKmer(text: String, k: Int, profile: Profile): String = {
     val km = kMers(text, k)
-    val probs = km.map(probability(_, profile))
-    println(probs)
-    val chosenIndex = random(probs: _*)
-    //println(" -> " + km(chosenIndex) + s"($chosenIndex)")
+    val chosenIndex = random(km.map(probability(_, profile)): _*)
     km(chosenIndex)
   }
 
   def gibbsSampler(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int): IndexedSeq[String] = {
-    val startMotifs = dna.map { text =>
-      text.drop(Random.nextInt(text.length - k + 1)).take(k)
-    }
-    (1 to N).foldLeft((startMotifs, score(startMotifs))) { (bestMotifs, _) =>
-      val i = Random.nextInt(t)
-      //print(bestMotifs + " " + i)
-      val (front, back) = bestMotifs._1.splitAt(i)
-      //print(" " + (front ++ back.tail))
-      val p = profile(front ++ back.tail)
-      println(p)
-      val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, p)) ++ back.tail
-      val newScore = score(newMotifs)
-      if (newScore < bestMotifs._2)
-        (newMotifs, newScore)
+    (1 to 100).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { (overalBestMotifs, _) =>
+      val startMotifs = dna.map { text =>
+        text.drop(Random.nextInt(text.length - k + 1)).take(k)
+      }
+      val current = (1 to N).foldLeft((startMotifs, score(startMotifs))) { (bestMotifs, _) =>
+        val i = Random.nextInt(t)
+        //print(bestMotifs + " " + i)
+        val (front, back) = bestMotifs._1.splitAt(i)
+        //print(" " + (front ++ back.tail))
+        val newProfile = profile(front ++ back.tail, 1)
+        //println(p)
+        val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, newProfile)) ++ back.tail
+        val newScore = score(newMotifs)
+        if (newScore < bestMotifs._2)
+          (newMotifs, newScore)
+        else
+          bestMotifs
+      }
+      if (current._2 < overalBestMotifs._2)
+        current
       else
-        bestMotifs
+        overalBestMotifs
     }._1
   }
 }
