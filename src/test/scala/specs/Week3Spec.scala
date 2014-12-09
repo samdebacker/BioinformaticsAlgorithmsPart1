@@ -611,7 +611,7 @@ class Week3Spec extends FeatureSpec {
       val k = 8
       val t = dna.length
       val N = 500
-      val M = 50
+      val M = 100
       gibbsSampler(dna, k, t, N, M) shouldBe dna"TCTCGGGG CCAAGGTG TACAGGCG TTCAGGTG TCCACGTG"
     }
     scenario("interactive quiz") {
