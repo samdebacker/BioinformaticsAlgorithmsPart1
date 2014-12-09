@@ -640,7 +640,7 @@ class Week3Spec extends FeatureSpec {
       val k = 15
       val t = dna.length
       val N = 2000
-      val M = 70
+      val M = 100
       val result = gibbsSampler(dna, k, t, N, M)
       //println(result.mkString("\n"))
       result shouldBe dna"""
