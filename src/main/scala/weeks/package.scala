@@ -22,11 +22,20 @@
  * THE SOFTWARE.
  */
 
-import org.scalatest.Tag
+import breeze.linalg.DenseMatrix
+import weeks.Week3._
 
-package object specs {
-  // Run with
-  //  testOnly FullSpec -- -l SlowTest
-  // to exclude tests that are marked as slow
-  object SlowTest extends Tag("SlowTest")
+package object weeks {
+  implicit class DnaHelper(val sc: StringContext) extends AnyVal {
+    def dna(args: Any*): IndexedSeq[DNA] = {
+      sc.parts.mkString.trim.toUpperCase.split("\\W+").toIndexedSeq
+    }
+  }
+
+  implicit class ProfileHelper(val sc: StringContext) extends AnyVal {
+    def profile(args: Any*): Profile = {
+      val m = sc.parts.mkString.trim.split("[^\\d\\.]+").map(_.toDouble)
+      new DenseMatrix(m.length / 4, 4, m).t
+    }
+  }
 }

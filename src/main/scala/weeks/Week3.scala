@@ -160,12 +160,12 @@ object Week3 {
   val greedyMotifSearch: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] = greedyMotifSearch_(0)
   val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] =  greedyMotifSearch_(1)
 
-  def randomizedMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
+  def randomizedMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int = 1000): IndexedSeq[String] = {
     def motifs(profile: Profile, dna: IndexedSeq[DNA]): IndexedSeq[String] = {
       dna.map(profileMostProbableKmer(_, k, profile))
     }
 
-    (1 to 1000).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { (overalBestMotifs, _) =>
+    (1 to N).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { case ((overalBestMotifs, scoreOveralBestMotifs), _) =>
       var currentMotifs = dna.map { text =>
         text.drop(Random.nextInt(text.length - k + 1)).take(k)
       }
@@ -181,11 +181,11 @@ object Week3 {
         } else
           continue = false
       }
-      if (bestMotifs._2 < overalBestMotifs._2) {
+      if (bestMotifs._2 < scoreOveralBestMotifs) {
         //println("Overal: " + bestMotifs)
         bestMotifs
       } else
-        overalBestMotifs
+        (overalBestMotifs, scoreOveralBestMotifs)
     }._1
   }
 
@@ -205,29 +205,29 @@ object Week3 {
     km(chosenIndex)
   }
 
-  def gibbsSampler(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int): IndexedSeq[String] = {
-    (1 to 100).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { (overalBestMotifs, _) =>
+  def gibbsSampler(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int, M: Int = 20): IndexedSeq[String] = {
+    (1 to M).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { case ((overalBestMotifs, scoreOveralBestMotifs), _) =>
       val startMotifs = dna.map { text =>
         text.drop(Random.nextInt(text.length - k + 1)).take(k)
       }
-      val current = (1 to N).foldLeft((startMotifs, score(startMotifs))) { (bestMotifs, _) =>
+      val current = (1 to N).foldLeft((startMotifs, score(startMotifs))) { case ((bestMotifs, scoreBestMotifs), _) =>
         val i = Random.nextInt(t)
         //print(bestMotifs + " " + i)
-        val (front, back) = bestMotifs._1.splitAt(i)
+        val (front, back) = bestMotifs.splitAt(i)
         //print(" " + (front ++ back.tail))
         val newProfile = profile(front ++ back.tail, 1)
         //println(p)
         val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, newProfile)) ++ back.tail
         val newScore = score(newMotifs)
-        if (newScore < bestMotifs._2)
+        if (newScore < scoreBestMotifs)
           (newMotifs, newScore)
         else
-          bestMotifs
+          (bestMotifs, scoreBestMotifs)
       }
-      if (current._2 < overalBestMotifs._2)
+      if (current._2 < scoreOveralBestMotifs)
         current
       else
-        overalBestMotifs
+        (overalBestMotifs, scoreOveralBestMotifs)
     }._1
   }
 }
