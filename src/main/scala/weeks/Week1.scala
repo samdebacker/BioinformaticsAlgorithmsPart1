@@ -16,14 +16,14 @@ object Week1 extends App {
   def frequentWords(text: String, k: Int) = {
     var maxCount = 0
     val count = new Array[Int](text.length - k + 1)
-    for (i <- 0 to (text.length - k)) {
+    for (i ← 0 to (text.length - k)) {
       val pattern = text.substring(i, i + k)
       count(i) = patternCount(text.substring(i), pattern) // we can skip the first i positions
       maxCount = Math.max(maxCount, count(i))
     }
     //println(count.mkString(" "))
     val frequentPatterns = mutable.Set.empty[String]
-    for (i <- 0 to (text.length - k)) {
+    for (i ← 0 to (text.length - k)) {
       if (count(i) == maxCount) {
         frequentPatterns += text.substring(i, i + k)
       }
@@ -35,7 +35,7 @@ object Week1 extends App {
   def frequentWordsMap(text: String, k: Int): Set[String] = {
     var maxCount = 0
     val frequency = mutable.Map.empty[String, Int]
-    for (i <- 0 to (text.length - k)) {
+    for (i ← 0 to (text.length - k)) {
       val pattern = text.substring(i, i + k)
       var updatedFrequency = 1
       if (frequency.contains(pattern)) {
@@ -46,7 +46,7 @@ object Week1 extends App {
     }
     //println(frequency)
     val frequentPatterns = mutable.Set.empty[String]
-    for ((key, value) <- frequency) {
+    for ((key, value) ← frequency) {
       if (value == maxCount) {
         frequentPatterns += key
       }
@@ -57,10 +57,10 @@ object Week1 extends App {
 
   def reverseComplement(text: String): String = {
     def complement(p: Char): Char = p match {
-      case 'A' => 'T'
-      case 'T' => 'A'
-      case 'G' => 'C'
-      case 'C' => 'G'
+      case 'A' ⇒ 'T'
+      case 'T' ⇒ 'A'
+      case 'G' ⇒ 'C'
+      case 'C' ⇒ 'G'
     }
     @tailrec
     def reverseComplementImpl(text: String, result: List[Char]): String =
@@ -82,7 +82,7 @@ object Week1 extends App {
   def findClumps(text: String, k: Int, L: Int, t: Int) = {
     def findFrequent(text: String): Iterable[String] = {
       val frequencies = mutable.Map.empty[String, Int]
-      for (i <- 0 to (text.length - k)) {
+      for (i ← 0 to (text.length - k)) {
         val pattern = text.substring(i, i + k)
         var updatedFrequency = 1
         if (frequencies.contains(pattern)) {
@@ -95,9 +95,9 @@ object Week1 extends App {
       result
     }
     val result = mutable.Set.empty[String]
-    for (i <- 0 to (text.length - L)) {
+    for (i ← 0 to (text.length - L)) {
       //result ++= findFrequent(text.substring(i, i + L))
-      findFrequent(text.substring(i, i + L)).foreach(pattern =>
+      findFrequent(text.substring(i, i + L)).foreach(pattern ⇒
         if (!result.contains(pattern)) {
           result += pattern
           //println(/*result.size + " " + */ pattern)
@@ -108,10 +108,10 @@ object Week1 extends App {
   }
 
   private def numeric(p: Char): Int = p match {
-    case 'A' => 0
-    case 'C' => 1
-    case 'G' => 2
-    case 'T' => 3
+    case 'A' ⇒ 0
+    case 'C' ⇒ 1
+    case 'G' ⇒ 2
+    case 'T' ⇒ 3
   }
 
   lazy val CONVERTION = Vector('A', 'C', 'G', 'T')
@@ -136,7 +136,7 @@ object Week1 extends App {
 
   def computeFrequencies(text: String, k: Int): Array[Int] = {
     val frequencies = new Array[Int](Math.pow(4, k).toInt)
-    for (i <- 0 to (text.length - k)) {
+    for (i ← 0 to (text.length - k)) {
       val pattern = text.substring(i, i + k)
       frequencies(patternToNumber(pattern)) += 1
     }
@@ -148,7 +148,7 @@ object Week1 extends App {
     val max = frequencies.reduce(Math.max)
     //println(max)
     for {
-      i <- (0 until Math.pow(4, k).toInt).toSet
+      i ← (0 until Math.pow(4, k).toInt).toSet
       if frequencies(i) == max
     } yield numberToPattern(i, k)
   }
@@ -156,9 +156,9 @@ object Week1 extends App {
   def fastFindClumps(text: String, k: Int, L: Int, t: Int) = {
     val clump = new Array[Boolean](Math.pow(4, k).toInt)
     val result = mutable.Set.empty[String]
-    for (i <- 0 to (text.length - L)) {
+    for (i ← 0 to (text.length - L)) {
       val frequencies = computeFrequencies(text.substring(i, i + L), k)
-      for (i <- 0 until frequencies.length) {
+      for (i ← 0 until frequencies.length) {
         if ((frequencies(i) >= t) && !clump(i)) {
           clump(i) = true
           val pattern = numberToPattern(i, k)
@@ -173,7 +173,7 @@ object Week1 extends App {
   def superFastFindClumps(text: String, k: Int, L: Int, t: Int) = {
     def findFrequencies(text: String): mutable.Map[String, Int] = {
       val frequencies = mutable.Map.empty[String, Int]
-      for (i <- 0 to (text.length - k)) {
+      for (i ← 0 to (text.length - k)) {
         val pattern = text.substring(i, i + k)
         var updatedFrequency = 1
         if (frequencies.contains(pattern)) {
@@ -205,13 +205,13 @@ object Week1 extends App {
 
     val frequencies = findFrequencies(text.substring(0, L))
     val result = mutable.Set.empty[String]
-    frequencies.filter(_._2 >= t).keys.foreach(pattern =>
+    frequencies.filter(_._2 >= t).keys.foreach(pattern ⇒
       if (!result.contains(pattern)) {
         result += pattern
-        println(/*result.size + " " + */ pattern)
+        println( /*result.size + " " + */ pattern)
       }
     )
-    for (i <- 0 until (text.length - L)) {
+    for (i ← 0 until (text.length - L)) {
       updateFrequencies(text.substring(i, i + k), text.substring(i + L - k + 1, i + L + 1), frequencies, result)
     }
     result
@@ -219,23 +219,23 @@ object Week1 extends App {
 
   def skew(text: String) = {
     def weight(p: Char) = p match {
-      case 'C' => -1
-      case 'G' => 1
-      case _ => 0
+      case 'C' ⇒ -1
+      case 'G' ⇒ 1
+      case _   ⇒ 0
     }
     val result = new Array[Int](text.length + 1)
     result(0) = 0
-    for (i <- 1 to text.length) {
+    for (i ← 1 to text.length) {
       result(i) = result(i - 1) + weight(text(i - 1))
     }
     result
   }
 
-  def xSkew(op: (Int, Int) => Int)(text: String) = {
+  def xSkew(op: (Int, Int) ⇒ Int)(text: String) = {
     val s = skew(text)
     val m = s.reduce(op)
     for {
-      i <- 0 until s.length
+      i ← 0 until s.length
       if s(i) == m
     } yield i
   }
@@ -278,7 +278,7 @@ object Week1 extends App {
     else {
       val neighbourhood = mutable.Set.empty[String]
       val tailNeighbours = neighbours(pattern.tail, d)
-      tailNeighbours.foreach { aTailNeighbour =>
+      tailNeighbours.foreach { aTailNeighbour ⇒
         if (hammingDistance(pattern.tail, aTailNeighbour) < d)
           neighbourhood ++= Set("A", "C", "G", "T").map(_ + aTailNeighbour)
         else
@@ -288,16 +288,16 @@ object Week1 extends App {
     }
   }
 
-  private def mostFrequentApproxPatternsImpl(text: String, k: Int, d: Int, countFunction: (String, String, Int) => Int) = {
+  private def mostFrequentApproxPatternsImpl(text: String, k: Int, d: Int, countFunction: (String, String, Int) ⇒ Int) = {
     var maxCount = 0
     val hood = mutable.Set.empty[String]
-    for (i <- 0 to (text.length - k)) {
+    for (i ← 0 to (text.length - k)) {
       val pattern = text.substring(i, i + k)
-      val n =  neighbours(pattern, d)
+      val n = neighbours(pattern, d)
       hood ++= n
     }
     val frequencies = mutable.Map.empty[String, Int]
-    hood.foreach { pattern =>
+    hood.foreach { pattern ⇒
       val countApprox = countFunction(text, pattern, d)
       maxCount = Math.max(maxCount, countApprox)
       frequencies += pattern -> countApprox
@@ -315,15 +315,14 @@ object Week1 extends App {
   //  val k = 6
   //  println(computeFrequencies(text, k).mkString(" "))
 
-
-//    val text = Source.fromFile("src/main/resources/EColi.txt").mkString
-//    val k = 9
-//    val L = 500
-//    val t = 3
-//  //  val clumpedPatterns = findClumps(text, k, L, t)
-//  //  val clumpedPatterns = fastFindClumps(text, k, L, t)
-//    val clumpedPatterns = superFastFindClumps(text, k, L, t)
-//    println(s"Found ${clumpedPatterns.size} patterns:\n" + clumpedPatterns.mkString(" "))
+  //    val text = Source.fromFile("src/main/resources/EColi.txt").mkString
+  //    val k = 9
+  //    val L = 500
+  //    val t = 3
+  //  //  val clumpedPatterns = findClumps(text, k, L, t)
+  //  //  val clumpedPatterns = fastFindClumps(text, k, L, t)
+  //    val clumpedPatterns = superFastFindClumps(text, k, L, t)
+  //    println(s"Found ${clumpedPatterns.size} patterns:\n" + clumpedPatterns.mkString(" "))
 
   ////  val text = "TAAAGACTGCCGAGAGGCCAACACGAGTGCTAGAACGAGGGGCGTAAACGCGGGTCCGAT"
   //  val text = Source.fromFile("src/main/resources/EColi.txt").mkString
@@ -346,46 +345,46 @@ object Week1 extends App {
   //  val result = countApproxPattern(text, pattern, d)
   //  println(s"countApproxPattern($text, $pattern, $d) = $result")
 
-//  val text = "GCATGGGAATAATAATTCGCGGGGCATTCGCTCGCTCGCAATGGGTCGCCCAAGCATGGGGGGAATTCGCCCAAAATGCATGCATTCGCAATCCAAAATCCAATCGCGCATGGGGGGTCGCTCGCGGGCCAAGCATGCATGGGAATGGGGGGGCATGCATAATAATGCATAATAATCCAACCAAAATCCAAGGGCCAACCAAAATCCAAAATCCAAGGGTCGCCCAATCGCGGGGGGAATAATGGGGCATCCAACCAAGGGGCATAATGGGCCAAGCATGCATAATGCATGGGGGGGCATGCATTCGCCCAAAATAATCCAAGCATAAT"
-//  val k = 9
-//  val d = 2
+  //  val text = "GCATGGGAATAATAATTCGCGGGGCATTCGCTCGCTCGCAATGGGTCGCCCAAGCATGGGGGGAATTCGCCCAAAATGCATGCATTCGCAATCCAAAATCCAATCGCGCATGGGGGGTCGCTCGCGGGCCAAGCATGCATGGGAATGGGGGGGCATGCATAATAATGCATAATAATCCAACCAAAATCCAAGGGCCAACCAAAATCCAAAATCCAAGGGTCGCCCAATCGCGGGGGGAATAATGGGGCATCCAACCAAGGGGCATAATGGGCCAAGCATGCATAATGCATGGGGGGGCATGCATTCGCCCAAAATAATCCAAGCATAAT"
+  //  val k = 9
+  //  val d = 2
   val text = "TTCAGGAGAGGCTACAACTTCAGGAGAGTTCAGGAGAGGATGAGATTGTTCAGGAGAGGATGAGATTGGCTACAACGATGAGATTGGATGAGATTGGATGAGATTGTTCAGGAGAGGCTACAACGAGGTCCATTACACTTAGCTACAACGCTACAACGAGGTCCATTTCAGGAGAGTTCAGGAGAGGCTACAACGCTACAACGAGGTCCATGCTACAACGCTACAACTTCAGGAGAGGAGGTCCATGATGAGATTGTTCAGGAGAGTACACTTAGAGGTCCATTACACTTAGATGAGATTGGATGAGATTGGAGGTCCATTTCAGGAGAGGAGGTCCATGAGGTCCATGCTACAACGATGAGATTGTTCAGGAGAGGAGGTCCATTACACTTAGAGGTCCATGAGGTCCATTACACTTAGAGGTCCATGCTACAACGCTACAACTACACTTAGATGAGATTGGAGGTCCATGATGAGATTGTACACTTATTCAGGAGAGGCTACAACTTCAGGAGAGGAGGTCCATGAGGTCCATTACACTTATTCAGGAGAGGCTACAACGCTACAACTACACTTAGATGAGATTGGCTACAACGATGAGATTGGAGGTCCATTTCAGGAGAGGCTACAACTTCAGGAGAGTACACTTAGCTACAACGCTACAACTTCAGGAGAGTACACTTAGCTACAACGATGAGATTGTACACTTAGAGGTCCATTTCAGGAGAGGAGGTCCATGATGAGATTGGATGAGATTGTTCAGGAGAGTACACTTAGAGGTCCATGAGGTCCATTACACTTAGATGAGATTGGAGGTCCATGCTACAACGAGGTCCATGAGGTCCATTTCAGGAGAGGAGGTCCATTTCAGGAGAGGAGGTCCATTACACTTATACACTTA"
   val k = 10
   val d = 3
   val result = mostFrequentApproxPatterns(text, k, d).mkString(" ")
   println(s"mostFrequentApproxPatterns($text, $k, $d) = $result")
 
-//  val text = "GTCTAGGTGTCAGGTCGTCACCACCACCACCTCACAGCTGTCCACGTCGTCTCTAGAGAGGTGTCACCACAGGTCACCACGTCGTCAGCTCTCACCACCACCTCACCTCACCTAGAGAGGTCACAGGTCGTCCACGTCAGGTCGTCTCACCTGTCACAGCTGTCGTCTCACAGGTCAGGTCGTCGTCCACGTCAGCT"
-//  val k = 10
-//  val d = 2
-//  val result = mostFrequentWithComplementApproxPatterns(text, k, d).mkString(" ")
-//  println(s"mostFrequentWithComplementApproxPatterns($text, $k, $d) = $result")
+  //  val text = "GTCTAGGTGTCAGGTCGTCACCACCACCACCTCACAGCTGTCCACGTCGTCTCTAGAGAGGTGTCACCACAGGTCACCACGTCGTCAGCTCTCACCACCACCTCACCTCACCTAGAGAGGTCACAGGTCGTCCACGTCAGGTCGTCTCACCTGTCACAGCTGTCGTCTCACAGGTCAGGTCGTCGTCCACGTCAGCT"
+  //  val k = 10
+  //  val d = 2
+  //  val result = mostFrequentWithComplementApproxPatterns(text, k, d).mkString(" ")
+  //  println(s"mostFrequentWithComplementApproxPatterns($text, $k, $d) = $result")
 
-//  val text = "GCTAGCT"
-//  println(s"reverseComplement('$text') = " + reverseComplement(text))
+  //  val text = "GCTAGCT"
+  //  println(s"reverseComplement('$text') = " + reverseComplement(text))
 
-//  val t1 = "TGACCCGTTATGCTCGAGTTCGGTCAGAGCGTCATTGCGAGTAGTCGTTTGCTTTCTCAAACTCC"
-//  val t2 = "GAGCGATTAAGCGTGACAGCCCCAGGGAACCCACAAAACGTGATCGCAGTCCATCCGATCATACA"
-//  println(s"hammingDistance($t1,$t2) = " + hammingDistance(t1,t2))
+  //  val t1 = "TGACCCGTTATGCTCGAGTTCGGTCAGAGCGTCATTGCGAGTAGTCGTTTGCTTTCTCAAACTCC"
+  //  val t2 = "GAGCGATTAAGCGTGACAGCCCCAGGGAACCCACAAAACGTGATCGCAGTCCATCCGATCATACA"
+  //  println(s"hammingDistance($t1,$t2) = " + hammingDistance(t1,t2))
 
-//  val text = "CATTCCAGTACTTCATGATGGCGTGAAGA"
-//  println(s"minSkew($text) = " + minSkew(text))
-//  println(s"maxSkew($text) = " + maxSkew(text))
+  //  val text = "CATTCCAGTACTTCATGATGGCGTGAAGA"
+  //  println(s"minSkew($text) = " + minSkew(text))
+  //  println(s"maxSkew($text) = " + maxSkew(text))
 
-//  val text = "CCGACAGGCTAGTCTATAATCCTGAGGCGTTACCCCAATACCGTTTACCGTGGGATTTGCTACTACAACTCCTGAGCGCTACATGTACGAAACCATGTTATGTAT"
-//  val k = 4
-//  val L = 30
-//  val t = 3
-//  val clumpedPatterns = superFastFindClumps(text, k, L, t)
-//  println(s"Found ${clumpedPatterns.size} patterns:\n" + clumpedPatterns.mkString(" "))
+  //  val text = "CCGACAGGCTAGTCTATAATCCTGAGGCGTTACCCCAATACCGTTTACCGTGGGATTTGCTACTACAACTCCTGAGCGCTACATGTACGAAACCATGTTATGTAT"
+  //  val k = 4
+  //  val L = 30
+  //  val t = 3
+  //  val clumpedPatterns = superFastFindClumps(text, k, L, t)
+  //  println(s"Found ${clumpedPatterns.size} patterns:\n" + clumpedPatterns.mkString(" "))
 
-//  val text = "CATGCCATTCGCATTGTCCCAGTGA"
-//  val pattern = "CCC"
-//  val d = 2
-//  println(s"countApproxPattern($text, $pattern, $d) = " + countApproxPattern(text, pattern, d))
+  //  val text = "CATGCCATTCGCATTGTCCCAGTGA"
+  //  val pattern = "CCC"
+  //  val d = 2
+  //  println(s"countApproxPattern($text, $pattern, $d) = " + countApproxPattern(text, pattern, d))
 
-//  val pattern = "ACGT"
-//  val d =  3
-//  val result = neighbours(pattern, d)
-//  println(s"#neighbours($pattern, $d) = ${result.size}")
+  //  val pattern = "ACGT"
+  //  val d =  3
+  //  val result = neighbours(pattern, d)
+  //  println(s"#neighbours($pattern, $d) = ${result.size}")
 }

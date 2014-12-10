@@ -18,10 +18,10 @@ object Week3 {
   type DNA = String
   def motifEnumeration(dna: IndexedSeq[DNA], k: Int, d: Int): Set[String] = {
     (for {
-      singleDna <- dna
-      i <- 0 until (singleDna.length - k)
+      singleDna ← dna
+      i ← 0 until (singleDna.length - k)
       kMer = singleDna.substring(i, i + k)
-      neighbour <- Week1.neighbours(kMer, d) if dna.forall(Week1.countApproxPattern(_, neighbour, d) > 0)
+      neighbour ← Week1.neighbours(kMer, d) if dna.forall(Week1.countApproxPattern(_, neighbour, d) > 0)
     } yield neighbour).toSet
   }
 
@@ -31,9 +31,9 @@ object Week3 {
   def count(motifs: IndexedSeq[DNA]): DenseMatrix[Double] = {
     val k = motifs.head.length
     val m = DenseMatrix.zeros[Double](4, k)
-    for (motif <- motifs; j <- 0 until motif.size) {
+    for (motif ← motifs; j ← 0 until motif.size) {
       val nucleotide = motif.charAt(j)
-      m(toIndex(nucleotide),j) += 1
+      m(toIndex(nucleotide), j) += 1
     }
     m
   }
@@ -53,13 +53,13 @@ object Week3 {
     @tailrec def consensi_(p: Profile, result: Set[String]): Set[String] = {
       if (p.cols == 0) result
       else {
-        val m = breeze.linalg.max(p(::,0))
+        val m = breeze.linalg.max(p(::, 0))
         val s = for {
-          r <- result
-          i <- 0 to 3
-          if p(i,0) == m
+          r ← result
+          i ← 0 to 3
+          if p(i, 0) == m
         } yield r + fromIndex(i)
-        consensi_(p(::,1 until p.cols), s)
+        consensi_(p(::, 1 until p.cols), s)
       }
     }
     consensi_(p, Set("")) - ""
@@ -69,15 +69,15 @@ object Week3 {
     val p = profile(motifs)
     val k = motifs.head.length
     val s = new StringBuilder
-    for (j <- 0 until k) {
-      s.append(fromIndex(argmax(p(::,j))))
+    for (j ← 0 until k) {
+      s.append(fromIndex(argmax(p(::, j))))
     }
     s.toString()
   }
 
   def score(motifs: IndexedSeq[DNA]): Int = {
     val c = consensus(motifs)
-    motifs.foldLeft(0) { (d, text) =>
+    motifs.foldLeft(0) { (d, text) ⇒
       d + Week1.hammingDistance(c, text)
     }
   }
@@ -85,30 +85,30 @@ object Week3 {
   def entropy(motifs: IndexedSeq[DNA]): Double = {
     def entropy(v: Vector[Double]): Double = {
       def log2(x: Double): Double = log(x) / log(2)
-      v.fold(0.0) { (acc, el) =>
+      v.fold(0.0) { (acc, el) ⇒
         acc - (if (el == 0.0) 0.0 else el * log2(el))
       }
     }
     val p = profile(motifs)
     val k = motifs.head.length
     (for {
-      j <- 0 until k
-    } yield entropy(p(::,j))).sum
+      j ← 0 until k
+    } yield entropy(p(::, j))).sum
   }
 
   def distance(pattern: String, dna: IndexedSeq[DNA]): Int = {
     val k = pattern.length
-    dna.map { d =>
+    dna.map { d ⇒
       (for {
-         i <- 0 to (d.length - k)
-         kMer = d.substring(i, i + k)
+        i ← 0 to (d.length - k)
+        kMer = d.substring(i, i + k)
       } yield Week1.hammingDistance(pattern, kMer)).min
     }.sum
   }
 
   def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int, all: Boolean = false): Set[String] = {
     val DPs = for {
-      i <- 0 until pow(4, k).toInt
+      i ← 0 until pow(4, k).toInt
       pattern = Week1.numberToPattern(i, k)
       d = distance(pattern, dna)
     } yield (d, pattern)
@@ -122,7 +122,7 @@ object Week3 {
       if (text.isEmpty || profile.cols == 0)
         result
       else
-        probability_(text.tail, profile(::,1 until profile.cols), result * profile(toIndex(text.head),0))
+        probability_(text.tail, profile(::, 1 until profile.cols), result * profile(toIndex(text.head), 0))
     }
     probability_(text, profile, 1.0)
   }
@@ -138,7 +138,7 @@ object Week3 {
   }
 
   def profileMostProbableKmer(text: String, k: Int, profile: Profile): String = {
-    kMers(text, k).map { kMer =>
+    kMers(text, k).map { kMer ⇒
       (probability(kMer, profile), kMer)
     }.maxBy(_._1)._2
     // CAREFUL maxBy uses GT comparison, while max uses GTEQ comparison! and the maxBy looks nicer!
@@ -146,8 +146,8 @@ object Week3 {
 
   // http://www.mrgraeme.co.uk/greedy-motif-search/
   private def greedyMotifSearch_(addCount: Int)(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
-    val allMotifs = kMers(dna.head, k).map { kMer =>
-      val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) =>
+    val allMotifs = kMers(dna.head, k).map { kMer ⇒
+      val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) ⇒
         acc :+ profileMostProbableKmer(text, k, profile(acc, addCount))
       }
       (motifs, score(motifs))
@@ -157,35 +157,36 @@ object Week3 {
     //allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
   }
 
-  val greedyMotifSearch: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] = greedyMotifSearch_(0)
-  val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNA], Int, Int) => IndexedSeq[String] =  greedyMotifSearch_(1)
+  val greedyMotifSearch: (IndexedSeq[DNA], Int, Int) ⇒ IndexedSeq[String] = greedyMotifSearch_(0)
+  val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNA], Int, Int) ⇒ IndexedSeq[String] = greedyMotifSearch_(1)
 
   def randomizedMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int = 1000): IndexedSeq[String] = {
     def motifs(profile: Profile, dna: IndexedSeq[DNA]): IndexedSeq[String] = {
       dna.map(profileMostProbableKmer(_, k, profile))
     }
 
-    (1 to N).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { case ((overalBestMotifs, scoreOveralBestMotifs), _) =>
-      var currentMotifs = dna.map { text =>
-        text.drop(Random.nextInt(text.length - k + 1)).take(k)
-      }
-      var bestMotifs = (currentMotifs, score(currentMotifs))
-      var continue = true
-      while (continue) {
-        val currentProfile = profile(currentMotifs, 1)
-        currentMotifs = motifs(currentProfile, dna)
-        val currentScore = score(currentMotifs)
-        if (currentScore < bestMotifs._2) {
-          bestMotifs = (currentMotifs, currentScore)
-          //println("Current: " + bestMotifs)
+    (1 to N).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) {
+      case ((overalBestMotifs, scoreOveralBestMotifs), _) ⇒
+        var currentMotifs = dna.map { text ⇒
+          text.drop(Random.nextInt(text.length - k + 1)).take(k)
+        }
+        var bestMotifs = (currentMotifs, score(currentMotifs))
+        var continue = true
+        while (continue) {
+          val currentProfile = profile(currentMotifs, 1)
+          currentMotifs = motifs(currentProfile, dna)
+          val currentScore = score(currentMotifs)
+          if (currentScore < bestMotifs._2) {
+            bestMotifs = (currentMotifs, currentScore)
+            //println("Current: " + bestMotifs)
+          } else
+            continue = false
+        }
+        if (bestMotifs._2 < scoreOveralBestMotifs) {
+          //println("Overal: " + bestMotifs)
+          bestMotifs
         } else
-          continue = false
-      }
-      if (bestMotifs._2 < scoreOveralBestMotifs) {
-        //println("Overal: " + bestMotifs)
-        bestMotifs
-      } else
-        (overalBestMotifs, scoreOveralBestMotifs)
+          (overalBestMotifs, scoreOveralBestMotifs)
     }._1
   }
 
@@ -206,28 +207,30 @@ object Week3 {
   }
 
   def gibbsSampler(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int, M: Int = 20): IndexedSeq[String] = {
-    (1 to M).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) { case ((overalBestMotifs, scoreOveralBestMotifs), _) =>
-      val startMotifs = dna.map { text =>
-        text.drop(Random.nextInt(text.length - k + 1)).take(k)
-      }
-      val current = (1 to N).foldLeft((startMotifs, score(startMotifs))) { case ((bestMotifs, scoreBestMotifs), _) =>
-        val i = Random.nextInt(t)
-        //print(bestMotifs + " " + i)
-        val (front, back) = bestMotifs.splitAt(i)
-        //print(" " + (front ++ back.tail))
-        val newProfile = profile(front ++ back.tail, 1)
-        //println(p)
-        val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, newProfile)) ++ back.tail
-        val newScore = score(newMotifs)
-        if (newScore < scoreBestMotifs)
-          (newMotifs, newScore)
+    (1 to M).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) {
+      case ((overalBestMotifs, scoreOveralBestMotifs), _) ⇒
+        val startMotifs = dna.map { text ⇒
+          text.drop(Random.nextInt(text.length - k + 1)).take(k)
+        }
+        val current = (1 to N).foldLeft((startMotifs, score(startMotifs))) {
+          case ((bestMotifs, scoreBestMotifs), _) ⇒
+            val i = Random.nextInt(t)
+            //print(bestMotifs + " " + i)
+            val (front, back) = bestMotifs.splitAt(i)
+            //print(" " + (front ++ back.tail))
+            val newProfile = profile(front ++ back.tail, 1)
+            //println(p)
+            val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, newProfile)) ++ back.tail
+            val newScore = score(newMotifs)
+            if (newScore < scoreBestMotifs)
+              (newMotifs, newScore)
+            else
+              (bestMotifs, scoreBestMotifs)
+        }
+        if (current._2 < scoreOveralBestMotifs)
+          current
         else
-          (bestMotifs, scoreBestMotifs)
-      }
-      if (current._2 < scoreOveralBestMotifs)
-        current
-      else
-        (overalBestMotifs, scoreOveralBestMotifs)
+          (overalBestMotifs, scoreOveralBestMotifs)
     }._1
   }
 }

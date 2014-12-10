@@ -50,16 +50,16 @@ class Week1Spec extends FeatureSpec {
 
     scenario("example") {
       val text = "ACAATGAGGTCACTATGTTCGAGCT"
-      findPattern(text,pattern) shouldBe List.empty[Int]
+      findPattern(text, pattern) shouldBe List.empty[Int]
     }
     scenario("VibrioCholerae") {
       val text = Source.fromFile("src/main/resources/VibrioCholerae.txt").mkString
-      findPattern(text,pattern) shouldBe List(60039, 98409, 129189, 152283, 152354, 152411, 163207, 197028, 200160, 357976, 376771, 392723, 532935, 600085, 622755, 1065555)
+      findPattern(text, pattern) shouldBe List(60039, 98409, 129189, 152283, 152354, 152411, 163207, 197028, 200160, 357976, 376771, 392723, 532935, 600085, 622755, 1065555)
     }
     scenario("ThermotogaPetrophila") {
       val text = Source.fromFile("src/main/resources/ThermotogaPetrophila.txt").mkString
       val pattern = "ATGATCAAG"
-      findPattern(text,pattern) shouldBe List(309348, 545367, 684487, 1176668, 1751372)
+      findPattern(text, pattern) shouldBe List(309348, 545367, 684487, 1176668, 1751372)
     }
   }
 
@@ -81,7 +81,7 @@ class Week1Spec extends FeatureSpec {
   feature("neighbours") {
     scenario("example") {
       val pattern = "GAGTTGAAGCA"
-      val d =  3
+      val d = 3
       neighbours(pattern, d).size shouldBe 4984
     }
   }

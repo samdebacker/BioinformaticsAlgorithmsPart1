@@ -499,7 +499,7 @@ class Week3Spec extends FeatureSpec {
                 """
       val k = 8
       val t = dna.length
-      randomizedMotifSearch(dna, k ,t, 10000) shouldBe dna"TCTCGGGG CCAAGGTG TACAGGCG TTCAGGTG TCCACGTG"
+      randomizedMotifSearch(dna, k, t, 10000) shouldBe dna"TCTCGGGG CCAAGGTG TACAGGCG TTCAGGTG TCCACGTG"
     }
     scenario("extra dataset") {
       val dna = dna"""
@@ -526,7 +526,7 @@ class Week3Spec extends FeatureSpec {
                 """
       val k = 15
       val t = dna.length
-      randomizedMotifSearch(dna, k ,t) shouldBe dna"""
+      randomizedMotifSearch(dna, k, t) shouldBe dna"""
                                                 CATGGGGAAAACTGA
                                                 CCTCTCGATCACCGA
                                                 CCTATAGATCACCGA
@@ -574,7 +574,7 @@ class Week3Spec extends FeatureSpec {
                 """
       val k = 15
       val t = dna.length
-      val result = randomizedMotifSearch(dna, k ,t)
+      val result = randomizedMotifSearch(dna, k, t)
       result shouldBe dna"""
                       GCATTTCGGTTAGTA
                       GCCAATACGTCAGTC
