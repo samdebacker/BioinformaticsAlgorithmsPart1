@@ -34,7 +34,7 @@ object DNAMotif {
   private def isValid(value: String): Option[IndexedSeq[DNAString]] = {
     val dnaStrings: Array[String] = value.trim.split("""\W+""")
     if (dnaStrings.forall { s ⇒ s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
-      Some(dnaStrings.map(new DNAString(_)).toIndexedSeq)
+      Some(dnaStrings.map(s => new DNAString(s.toUpperCase)).toIndexedSeq)
     } else {
       None
     }
@@ -48,17 +48,17 @@ object DNAMotif {
       case Literal(stringConst) ⇒
         val literalValue = stringConst.value.toString
         isValid(literalValue) match {
-          case Some(dnaStrings) ⇒ q"DNAMotif.from($value).get"
+          case Some(dnaStrings) ⇒
           case _                ⇒ c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length, and can only contain nucleotides A, C, G or T")
         }
       case _ ⇒
         c.abort(c.enclosingPosition, "DNAMotif macro only works on String Literals, use DNAMotif.form(String) instead.")
     }
-    // We shouldn't get here
+    // Pitty we cannot access the private constructor here
     q"DNAMotif.from($value).get"
   }
 }
 
-final class DNAMotif(val value: IndexedSeq[DNAString]) extends AnyVal {
+final class DNAMotif private[weeks] (val value: IndexedSeq[DNAString]) extends AnyVal {
   override def toString: String = value.toString
 }
