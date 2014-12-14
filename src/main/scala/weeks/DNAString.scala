@@ -32,8 +32,8 @@ object DNAString {
   }
   private[this] val dnaString = """[ACGT]+""".r
   private[weeks] def isValid(value: String): Boolean = value match {
-    case dnaString(_ *) => true
-    case _ => false
+    case dnaString(_*) ⇒ true
+    case _             ⇒ false
   }
 
   import scala.language.experimental.macros
@@ -41,11 +41,11 @@ object DNAString {
   def applyMacro(c: Context)(value: c.Expr[String]): c.Tree = {
     import c.universe._
     value.tree match {
-      case Literal(stringConst) =>
+      case Literal(stringConst) ⇒
         val literalValue = stringConst.value.toString
         if (!isValid(literalValue))
           c.abort(c.enclosingPosition, "DNAString can only contain nucleotide A, C, G or T")
-      case _ =>
+      case _ ⇒
         c.abort(c.enclosingPosition, "DNAString macro only works on String Literals, use DNAString.form(String) instead.")
     }
     q"DNAString.from($value).get"

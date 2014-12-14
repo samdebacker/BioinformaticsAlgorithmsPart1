@@ -28,12 +28,12 @@ import scala.reflect.macros.whitebox.Context
 
 object DNAMotif {
   @inline def from(value: String): Option[DNAMotif] = isValid(value) match {
-    case Some(valid) => Some(new DNAMotif(valid))
-    case _ => None
+    case Some(valid) ⇒ Some(new DNAMotif(valid))
+    case _           ⇒ None
   }
   private def isValid(value: String): Option[IndexedSeq[DNAString]] = {
-    val dnaStrings: Array[String] = value.split("""\W+""")
-    if (dnaStrings.foldLeft(true) { case (acc, el) => acc && DNAString.isValid(el) }) {
+    val dnaStrings: Array[String] = value.trim.split("""\W+""")
+    if (dnaStrings.foldLeft(true) { case (acc, el) ⇒ acc && DNAString.isValid(el) }) {
       Some(dnaStrings.map(new DNAString(_)).toIndexedSeq)
     } else {
       None
@@ -45,13 +45,13 @@ object DNAMotif {
   def applyMacro(c: Context)(value: c.Expr[String]) = {
     import c.universe._
     value.tree match {
-      case Literal(stringConst) =>
+      case Literal(stringConst) ⇒
         val literalValue = stringConst.value.toString
         isValid(literalValue) match {
-          case Some(dnaStrings) => q"DNAMotif.from($value).get"
-          case _ => c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length")
+          case Some(dnaStrings) ⇒ q"DNAMotif.from($value).get"
+          case _                ⇒ c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length")
         }
-      case _ =>
+      case _ ⇒
         c.abort(c.enclosingPosition, "DNAMotif macro only works on String Literals, use DNAMotif.form(String) instead.")
     }
     // We shouldn't get here
