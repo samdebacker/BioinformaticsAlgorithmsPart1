@@ -62,4 +62,5 @@ object DNAMotif {
 
 final class DNAMotif private[weeks] (val value: IndexedSeq[DNAString]) extends AnyVal {
   override def toString: String = value.toString
+  def k: Int = value.head.value.length
 }

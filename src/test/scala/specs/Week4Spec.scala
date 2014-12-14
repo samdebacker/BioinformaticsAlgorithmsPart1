@@ -76,5 +76,31 @@ class Week4Spec extends FeatureSpec {
     }
   }
 
+  feature("overlap") {
+    scenario("example") {
+      import weeks.DNAString.StringToDNAString
+      val patterns = DNAMotif("ATGCG\nGCATG\nCATGC\nAGGCA\nGGCAT")
+      val result: IndexedSeq[(DNAString, DNAString)] = IndexedSeq("AGGCA".toDNA -> "GGCAT".toDNA, "CATGC".toDNA -> "ATGCG".toDNA, "GCATG".toDNA -> "CATGC".toDNA, "GGCAT".toDNA -> "GCATG".toDNA)
+      overlap(patterns) shouldBe result
+    }
+
+    val regex = """(?i)([ACGT]+) -> ([ACGT]+)""".r
+
+    scenario("extra dataset") {
+      val patterns = DNAMotif.from(Source.fromFile("src/main/resources/overlapExtraDatasetInput.txt").getLines().mkString("\n")).get
+      val expectedResult = Source.fromFile("src/main/resources/overlapExtraDatasetOutput.txt").getLines().map { case regex(left, right) =>
+        DNAString.from(left).get -> DNAString.from(right).get
+      }.toIndexedSeq
+      overlap(patterns) shouldBe expectedResult
+    }
+
+    scenario("interactive quiz") {
+      val patterns = DNAMotif.from(Source.fromFile("src/main/resources/overlapInterativeQuizInput.txt").getLines().mkString("\n")).get
+      val expectedResult = Source.fromFile("src/main/resources/overlapInterativeQuizOutput.txt").getLines().map { case regex(left, right) =>
+        DNAString.from(left).get -> DNAString.from(right).get
+      }.toIndexedSeq
+      overlap(patterns) shouldBe expectedResult
+    }
+  }
 
 }

@@ -76,6 +76,10 @@ object DNAString {
     // Pitty we cannot access the private constructor here
     q"DNAString.from(${value}).get"
   }
+
+  implicit class StringToDNAString(val s: String) extends AnyVal {
+    def toDNA: DNAString = from(s).get
+  }
 }
 
 final class DNAString private[weeks] (val value: String) extends AnyVal {
