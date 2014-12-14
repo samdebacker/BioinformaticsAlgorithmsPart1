@@ -8,3 +8,4 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(PreserveDanglingCloseParenthesis, true)
   .setPreference(RewriteArrowSymbols, true)
+  .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
