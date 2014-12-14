@@ -41,6 +41,7 @@ object DNAMotif {
   }
 
   import scala.language.experimental.macros
+  import scala.language.implicitConversions
   implicit def apply(value: String): DNAMotif = macro applyMacro
   def applyMacro(c: Context)(value: c.Expr[String]) = {
     import c.universe._

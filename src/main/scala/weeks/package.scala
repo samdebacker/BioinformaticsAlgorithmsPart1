@@ -26,7 +26,9 @@ import breeze.linalg.DenseMatrix
 import weeks.Week3._
 
 package object weeks {
+
   implicit class DnaHelper(val sc: StringContext) extends AnyVal {
+    @deprecated("use DNAString and DNAMotif", "0.1")
     def dna(args: Any*): IndexedSeq[DNA] = {
       sc.parts.mkString.trim.toUpperCase.split("\\W+").toIndexedSeq
     }
