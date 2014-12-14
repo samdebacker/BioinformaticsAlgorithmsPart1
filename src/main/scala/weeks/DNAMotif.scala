@@ -33,7 +33,7 @@ object DNAMotif {
   }
   private def isValid(value: String): Option[IndexedSeq[DNAString]] = {
     val dnaStrings: Array[String] = value.trim.split("""\W+""")
-    if (dnaStrings.forall { s => s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
+    if (dnaStrings.forall { s ⇒ s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
       Some(dnaStrings.map(new DNAString(_)).toIndexedSeq)
     } else {
       None
@@ -59,6 +59,6 @@ object DNAMotif {
   }
 }
 
-final class DNAMotif private[weeks] (val value: IndexedSeq[DNAString]) extends AnyVal {
+final class DNAMotif(val value: IndexedSeq[DNAString]) extends AnyVal {
   override def toString: String = value.toString
 }

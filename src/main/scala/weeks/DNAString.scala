@@ -52,6 +52,6 @@ object DNAString {
   }
 }
 
-final class DNAString private[weeks] (val value: String) extends AnyVal {
+final class DNAString(val value: String) extends AnyVal {
   override def toString: String = value.toString
 }
