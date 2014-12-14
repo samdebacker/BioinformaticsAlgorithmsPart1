@@ -33,7 +33,7 @@ object DNAMotif {
   }
   private def isValid(value: String): Option[IndexedSeq[DNAString]] = {
     val dnaStrings: Array[String] = value.trim.split("""\W+""")
-    if (dnaStrings.foldLeft(true) { case (acc, el) ⇒ acc && DNAString.isValid(el) }) {
+    if (dnaStrings.forall { s => s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
       Some(dnaStrings.map(new DNAString(_)).toIndexedSeq)
     } else {
       None
@@ -49,7 +49,7 @@ object DNAMotif {
         val literalValue = stringConst.value.toString
         isValid(literalValue) match {
           case Some(dnaStrings) ⇒ q"DNAMotif.from($value).get"
-          case _                ⇒ c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length")
+          case _                ⇒ c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length, and can only contain nucleotides A, C, G or T")
         }
       case _ ⇒
         c.abort(c.enclosingPosition, "DNAMotif macro only works on String Literals, use DNAMotif.form(String) instead.")

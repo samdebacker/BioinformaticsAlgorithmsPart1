@@ -44,7 +44,7 @@ object DNAString {
       case Literal(stringConst) ⇒
         val literalValue = stringConst.value.toString
         if (!isValid(literalValue))
-          c.abort(c.enclosingPosition, "DNAString can only contain nucleotide A, C, G or T")
+          c.abort(c.enclosingPosition, "DNAString can only contain nucleotides A, C, G or T")
       case _ ⇒
         c.abort(c.enclosingPosition, "DNAString macro only works on String Literals, use DNAString.form(String) instead.")
     }
