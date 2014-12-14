@@ -34,7 +34,7 @@ object DNAMotif {
   private def isValid(value: String): Option[IndexedSeq[DNAString]] = {
     val dnaStrings: Array[String] = value.trim.split("""\W+""")
     if (dnaStrings.forall { s ⇒ s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
-      Some(dnaStrings.map(s => new DNAString(s.toUpperCase)).toIndexedSeq)
+      Some(dnaStrings.map(s ⇒ new DNAString(s.toUpperCase)).toIndexedSeq)
     } else {
       None
     }

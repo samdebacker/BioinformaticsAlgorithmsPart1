@@ -152,6 +152,7 @@ object Week3 {
     probability_(text, profile, 1.0)
   }
 
+  @deprecated("use the weeks4.compostionkMers")
   def kMers(text: DNA, k: Int): IndexedSeq[DNA] = {
     @tailrec def kMers_(text: String, result: IndexedSeq[DNA]): IndexedSeq[DNA] = {
       if (text.length < k)

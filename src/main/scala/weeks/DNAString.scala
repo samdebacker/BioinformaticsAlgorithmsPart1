@@ -52,10 +52,10 @@ import scala.reflect.macros.whitebox.Context
 
 object DNAString {
   @inline def from(value: String): Option[DNAString] = {
-    if (isValid(value)) Some(new DNAString(value.toUpperCase)) else None
+    if (isValid(value)) Some(new DNAString(value.trim.toUpperCase)) else None
   }
   private[this] val dnaString = """(?i)[ACGT]+""".r
-  private[weeks] def isValid(value: String): Boolean = value match {
+  private[weeks] def isValid(value: String): Boolean = value.trim match {
     case dnaString(_*) ⇒ true
     case _             ⇒ false
   }
@@ -74,7 +74,7 @@ object DNAString {
         c.abort(c.enclosingPosition, "DNAString macro only works on String Literals, use DNAString.form(String) instead.")
     }
     // Pitty we cannot access the private constructor here
-    q"DNAString.from($value).get"
+    q"DNAString.from(${value}).get"
   }
 }
 
