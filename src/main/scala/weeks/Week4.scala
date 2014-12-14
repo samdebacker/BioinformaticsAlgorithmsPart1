@@ -36,4 +36,11 @@ object Week4 {
     }
     kMers_(text.value, IndexedSeq.empty[DNAString]).sortBy(_.value)
   }
+
+  def stringSpelledByGenomePath(path: DNAMotif): DNAString = {
+    val k = path.value(0).value.length
+    DNAString.from(path.value.tail.foldLeft(new StringBuilder(path.value.head.value)) { (acc, el) =>
+        acc.append(el.value.charAt(k -1 ))
+    }.toString).get
+  }
 }
