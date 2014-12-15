@@ -39,16 +39,30 @@ object Week4 {
 
   def stringSpelledByGenomePath(path: DNAMotif): DNAString = {
     val k = path.k
-    DNAString.from(path.value.tail.foldLeft(new StringBuilder(path.value.head.value)) { (acc, el) =>
-        acc.append(el.value.charAt(k -1 ))
+    DNAString.from(path.value.tail.foldLeft(new StringBuilder(path.value.head.value)) { (acc, el) ⇒
+      acc.append(el.value.charAt(k - 1))
     }.toString).get
   }
 
   def overlap(patterns: DNAMotif): IndexedSeq[(DNAString, DNAString)] = {
     val k = patterns.k
     (for {
-      p <- patterns.value
-      q <- patterns.value if q.value.take(k - 1) == p.value.tail
-    } yield (p,q)).sortBy { case (l, r) => l.value }
+      p ← patterns.value
+      q ← patterns.value if q.value.take(k - 1) == p.value.tail
+    } yield (p, q)).sortBy { case (l, r) ⇒ l.value }
+  }
+
+  def deBruijn(text: DNAString, k: Int): IndexedSeq[(DNAString, IndexedSeq[DNAString])] = {
+    import weeks.DNAString.StringToDNAString
+    (for {
+      p ← compositionKmers(text, k)
+    } yield (p.value.take(k - 1).toDNA, p.value.tail.toDNA))
+      .groupBy(_._1.value)
+      .toIndexedSeq
+      .map {
+        case (k, v) ⇒
+          (k.toDNA, v.map(_._2))
+      }
+      .sortBy { case (k, v) ⇒ k.value }
   }
 }
