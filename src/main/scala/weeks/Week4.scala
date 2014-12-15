@@ -59,10 +59,26 @@ object Week4 {
     } yield (p.value.take(k - 1).toDNA, p.value.tail.toDNA))
       .groupBy(_._1.value)
       .toIndexedSeq
-      .map {
-        case (k, v) ⇒
-          (k.toDNA, v.map(_._2))
+      .map { case (k, v) ⇒
+        (k.toDNA, v.map(_._2))
       }
       .sortBy { case (k, v) ⇒ k.value }
+  }
+
+  def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false) = {
+    import weeks.DNAString.StringToDNAString
+    val k = kMers.k
+    (for {
+      kMer <- kMers.value
+    } yield (kMer.value.take(k -1).toDNA, kMer.value.tail.toDNA))
+      .groupBy(_._1.value)
+      .toIndexedSeq
+      .map { case (k,v) =>
+        if (sort)
+          (k.toDNA, v.map(_._2))
+        else
+          (k.toDNA, v.map(_._2).sortBy(_.value))
+      }
+      .sortBy { case (k, _) => k.value }
   }
 }
