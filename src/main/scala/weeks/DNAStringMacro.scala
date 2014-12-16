@@ -27,7 +27,7 @@ package weeks
 import scala.reflect.macros.whitebox.Context
 
 object DNAStringMacro {
-  def applyMacro(c: Context)(value: c.Expr[String]): c.Tree = {
+  def applyMacro(c: Context)(value: c.Expr[String]): c.Expr[DNAString] = {
     import c.universe._
     value.tree match {
       case Literal(stringConst) ⇒
@@ -38,7 +38,9 @@ object DNAStringMacro {
         c.abort(c.enclosingPosition, "DNAString macro only works on String Literals, use DNAString.from(String) instead.")
     }
     // Pitty we cannot access the private constructor here
-    q"DNAString.unsafeFrom(${value})"
+    reify {
+      DNAString.unsafeFrom(value.splice)
+    }
   }
 
   def dnaMacro(c: Context)(args: c.Tree*): c.Expr[DNAString] = {
@@ -46,6 +48,7 @@ object DNAStringMacro {
     println("VALUE: " + args)
     //val value = sc.parts.mkString // CANNOT GET THE StringContext sc here /!\
     reify {
+      // FIXME Can we fix this?
       DNAString.from("ACGT").get
     }
   }

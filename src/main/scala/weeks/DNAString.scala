@@ -56,7 +56,7 @@ object DNAString {
   }
 
   /**
-   * For macro use, do not call this method yourself /!\
+   * /!\ For macro use, do not call this method directly /!\
    */
   @inline def unsafeFrom(value: String): DNAString = new DNAString(value.trim.toUpperCase)
 
@@ -68,7 +68,6 @@ object DNAString {
 
   import scala.language.experimental.macros
   import scala.language.implicitConversions
-
   implicit def apply(value: String): DNAString = macro DNAStringMacro.applyMacro
 
   implicit class StringToDNAString(val s: String) extends AnyVal {
