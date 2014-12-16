@@ -6,7 +6,6 @@ import weeks.Week1._
 
 import scala.io.Source
 
-@DoNotDiscover
 class Week1Spec extends FeatureSpec {
   feature("patternCount") {
     scenario("example") {

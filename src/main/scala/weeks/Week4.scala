@@ -49,7 +49,7 @@ object Week4 {
     (for {
       p ← patterns.value
       q ← patterns.value if q.value.take(k - 1) == p.value.tail
-    } yield (p, q)).sortBy { case (l, r) ⇒ l.value }
+    } yield (p, q)).sortBy { case (l, _) ⇒ l.value }
   }
 
   def deBruijn(text: DNAString, k: Int): IndexedSeq[(DNAString, IndexedSeq[DNAString])] = {
@@ -62,7 +62,7 @@ object Week4 {
       .map { case (k, v) ⇒
         (k.toDNA, v.map(_._2))
       }
-      .sortBy { case (k, v) ⇒ k.value }
+      .sortBy { case (k, _) ⇒ k.value }
   }
 
   def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false) = {

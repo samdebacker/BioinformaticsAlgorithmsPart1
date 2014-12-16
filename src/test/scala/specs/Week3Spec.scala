@@ -6,7 +6,6 @@ import org.scalatest._
 import weeks.Week3._
 import weeks._
 
-@DoNotDiscover
 class Week3Spec extends FeatureSpec {
   feature("expectedNumberOfOccurences") {
     scenario("interactive quiz") {

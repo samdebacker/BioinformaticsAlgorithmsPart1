@@ -48,13 +48,19 @@
 
 package weeks
 
-import scala.reflect.macros.whitebox.Context
+import scala.util.matching.Regex
 
 object DNAString {
   @inline def from(value: String): Option[DNAString] = {
     if (isValid(value)) Some(new DNAString(value.trim.toUpperCase)) else None
   }
-  private[this] val dnaString = """(?i)[ACGT]+""".r
+
+  /**
+   * For macro use, do not call this method yourself /!\
+   */
+  @inline def unsafeFrom(value: String): DNAString = new DNAString(value.trim.toUpperCase)
+
+  private[this] val dnaString: Regex = """(?i)[ACGT]+""".r
   private[weeks] def isValid(value: String): Boolean = value.trim match {
     case dnaString(_*) ⇒ true
     case _             ⇒ false
@@ -62,23 +68,16 @@ object DNAString {
 
   import scala.language.experimental.macros
   import scala.language.implicitConversions
-  implicit def apply(value: String): DNAString = macro applyMacro
-  def applyMacro(c: Context)(value: c.Expr[String]): c.Tree = {
-    import c.universe._
-    value.tree match {
-      case Literal(stringConst) ⇒
-        val literalValue = stringConst.value.toString
-        if (!isValid(literalValue))
-          c.abort(c.enclosingPosition, "DNAString can only contain nucleotides A, C, G or T")
-      case _ ⇒
-        c.abort(c.enclosingPosition, "DNAString macro only works on String Literals, use DNAString.form(String) instead.")
-    }
-    // Pitty we cannot access the private constructor here
-    q"DNAString.from(${value}).get"
-  }
+
+  implicit def apply(value: String): DNAString = macro DNAStringMacro.applyMacro
 
   implicit class StringToDNAString(val s: String) extends AnyVal {
-    def toDNA: DNAString = from(s).get
+    @inline def toDNA: DNAString = from(s).get
+  }
+
+  // Non-working experiment
+  implicit class DNAStringInterpolator(val sc: StringContext) extends AnyVal {
+    def dnaM(args: Any*): DNAString = macro DNAStringMacro.dnaMacro
   }
 }
 
