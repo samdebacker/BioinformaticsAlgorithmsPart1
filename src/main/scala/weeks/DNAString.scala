@@ -55,10 +55,14 @@ object DNAString {
     if (isValid(value)) Some(new DNAString(value.trim.toUpperCase)) else None
   }
 
+  // We could hide it in an inner factory class so working around it makes it even more difficult,
+  // but no guarantees, so maybe better clearly mark it as unsafe
+  //class UnsafeFrom {
   /**
    * /!\ For macro use, do not call this method directly /!\
    */
-  @inline def unsafeFrom(value: String): DNAString = new DNAString(value.trim.toUpperCase)
+  @inline /*protected*/ def unsafeFrom(value: String): DNAString = new DNAString(value.trim.toUpperCase)
+  //}
 
   private[this] val dnaString: Regex = """(?i)[ACGT]+""".r
   private[weeks] def isValid(value: String): Boolean = value.trim match {

@@ -37,10 +37,19 @@ object DNAStringMacro {
       case _ ⇒
         c.abort(c.enclosingPosition, "DNAString macro only works on String Literals, use DNAString.from(String) instead.")
     }
-    // Pitty we cannot access the private constructor here
+    // As state by Eugene Burmako in http://stackoverflow.com/questions/19170137/scala-using-private-constructor-in-a-macro
+    // we cannot call a private method, so we do it via an unattractive method, called unsafe.
+    // Didn't use the vampire method approach, that would loose the AnyVal benefit!
     reify {
       DNAString.unsafeFrom(value.splice)
     }
+    // If using UnsafeFrom this is a way to make it happen:
+    // q"""
+    //     class UnsafeI extends weeks.DNAString.UnsafeFrom {
+    //       def unsafeFromI(value: String): DNAString = unsafeFrom(value)
+    //     }
+    //     (new UnsafeI).unsafeFromI($value)
+    // """
   }
 
   def dnaMacro(c: Context)(args: c.Tree*): c.Expr[DNAString] = {
