@@ -75,9 +75,9 @@ class Week4Spec extends FeatureSpec {
     }
 
     scenario("quiz") {
-      val path = DNAMotif("AAAT\nAATG\nACCC\nACGC\nATAC\nATCA\nATGC\nCAAA\nCACC\nCATA\nCATC\nCCAG\nCCCA\nCGCT\nCTCA\nGCAT\nGCTC\nTACG\nTCAC\nTCAT\nTGCA")
+      val path = DNAMotif("CAAA\nAAAT\nAATG\nATGC\nTGCA\nGCAT\nCATA\nATAC\nTACG\nACGC\nCGCT\nGCTC\nCTCA\nTCAT\nCATC\nATCA\nTCAC\nCACC\nACCC\nCCCA\nCCAG")
       val result = stringSpelledByGenomePath(path)
-      result shouldBe DNAString("AAATGCCCACACACGATATCGCTA")
+      result shouldBe DNAString("CAAATGCATACGCTCATCACCCAG")
     }
   }
 
