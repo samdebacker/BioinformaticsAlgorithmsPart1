@@ -66,7 +66,7 @@ object Week4 {
       .sortBy { case (k, _) ⇒ k.value }
   }
 
-  def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false) = {
+  def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false): IndexedSeq[(DNAString, IndexedSeq[DNAString])] = {
     import weeks.DNAString.StringToDNAString
     val k = kMers.k
     (for {
@@ -82,5 +82,36 @@ object Week4 {
             (k.toDNA, v.map(_._2).sortBy(_.value))
       }
       .sortBy { case (k, _) ⇒ k.value }
+  }
+
+  def eulerianCycle(graph: IndexedSeq[Seq[Int]]): IndexedSeq[Int] = {
+    @tailrec def cycle_(start: Int, graph: IndexedSeq[Seq[Int]], cycle: IndexedSeq[Int]): (IndexedSeq[Int], IndexedSeq[Seq[Int]]) = {
+      val nextNode = graph(cycle.last).head
+      val removedEdgeGraph: IndexedSeq[Seq[Int]] = graph.updated(cycle.last, graph(cycle.last).tail)
+      if (nextNode == start) {
+        (cycle :+ nextNode, removedEdgeGraph)
+      } else {
+        cycle_(start, removedEdgeGraph, cycle :+ nextNode)
+      }
+    }
+    @tailrec def eulerianCycle_(cycle: IndexedSeq[Int], restGraph: IndexedSeq[Seq[Int]]): IndexedSeq[Int] = {
+      if (restGraph.map(_.size).sum == 0) {
+        cycle
+      } else {
+        val node: Int = cycle.find { node =>
+          restGraph(node).size > 0
+        }.get
+        val nodeIndex = cycle.indexOf(node)
+        //println("nodeIndex = " + nodeIndex)
+        val (newCycle, newRestGraph) = cycle_(node, restGraph, IndexedSeq(node))
+        //println(cycle(nodeIndex) + " " + newCycle.tail.mkString("->") + " " + cycle.drop(nodeIndex + 1).mkString("->") + " " + cycle.tail.take(nodeIndex).mkString("->"))
+        val mergedCycle = (cycle(nodeIndex) +: newCycle.tail) ++ cycle.drop(nodeIndex + 1) ++ cycle.tail.take(nodeIndex)
+        //println(mergedCycle.mkString("->"))
+        //println(newRestGraph)
+        eulerianCycle_(mergedCycle, newRestGraph)
+      }
+    }
+    val (cycle, restGraph) = cycle_(0, graph, IndexedSeq(0))
+    eulerianCycle_(cycle, restGraph)
   }
 }
