@@ -84,47 +84,52 @@ object Week4 {
       .sortBy { case (k, _) ⇒ k.value }
   }
 
-  def eulerianCycle(graph: IndexedSeq[Seq[Int]]): IndexedSeq[Int] = {
-    @tailrec def cycle_(start: Int, graph: IndexedSeq[Seq[Int]], cycle: IndexedSeq[Int]): (IndexedSeq[Int], IndexedSeq[Seq[Int]]) = {
+  def eulerianCycle[T](graph: Map[T, Seq[T]]): IndexedSeq[T] = {
+    @tailrec def cycle_(start: T, graph: Map[T, Seq[T]], cycle: IndexedSeq[T]): (IndexedSeq[T], Map[T, Seq[T]]) = {
       val nextNode = graph(cycle.last).head
-      val removedEdgeGraph: IndexedSeq[Seq[Int]] = graph.updated(cycle.last, graph(cycle.last).tail)
+      val removedEdgeGraph: Map[T, Seq[T]] = graph.updated(cycle.last, graph(cycle.last).tail)
       if (nextNode == start) {
         (cycle :+ nextNode, removedEdgeGraph)
       } else {
         cycle_(start, removedEdgeGraph, cycle :+ nextNode)
       }
     }
-    @tailrec def eulerianCycle_(cycle: IndexedSeq[Int], restGraph: IndexedSeq[Seq[Int]]): IndexedSeq[Int] = {
-      if (restGraph.map(_.size).sum == 0) {
+    def eulerianCycle_(cycle: IndexedSeq[T], restGraph: Map[T, Seq[T]]): IndexedSeq[T] = {
+      if (restGraph.values.map(_.size).sum == 0) {
         cycle
       } else {
-        val node: Int = cycle.find { node ⇒
+        val node: T = cycle.find { node ⇒
           restGraph(node).size > 0
         }.get
         val nodeIndex = cycle.indexOf(node)
         val (newCycle, newRestGraph) = cycle_(node, restGraph, IndexedSeq(node))
         val mergedCycle = newCycle ++
-          (if (nodeIndex < cycle.size) cycle.view(nodeIndex + 1, cycle.size) else Seq.empty[Int]) ++
-          (if (nodeIndex > 0) cycle.view(1, nodeIndex + 1) else Seq.empty[Int])
+          (if (nodeIndex < cycle.size) cycle.view(nodeIndex + 1, cycle.size) else Seq.empty[T]) ++
+          (if (nodeIndex > 0) cycle.view(1, nodeIndex + 1) else Seq.empty[T])
         eulerianCycle_(mergedCycle, newRestGraph)
       }
     }
-    val (cycle, restGraph) = cycle_(0, graph, IndexedSeq(0))
+    val firstNode: T = graph.head._1
+    val (cycle, restGraph) = cycle_(firstNode, graph, IndexedSeq(firstNode))
     eulerianCycle_(cycle, restGraph)
   }
 
-  def eulerianPath(graph: IndexedSeq[Seq[Int]]): IndexedSeq[Int] = {
+  def eulerianPath(graph: Map[Int, Seq[Int]]): IndexedSeq[Int] = {
     @tailrec def increase(nodes: Seq[Int], indegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
       if (nodes.isEmpty) indegrees
       else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
     }
-    @tailrec def inDegreesOf(graph: IndexedSeq[Seq[Int]], inDegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
+    @tailrec def inDegreesOf(graph: Map[Int, Seq[Int]], inDegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
       if (graph.isEmpty) inDegrees
       else {
-        inDegreesOf(graph.tail, increase(graph.head, inDegrees))
+        inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))
       }
     }
-    val inDegrees = inDegreesOf(graph, IndexedSeq.fill(graph.size)(0)).zipWithIndex
+    val max = (for {
+      edges ← graph
+      node ← edges._2
+    } yield node).max
+    val inDegrees = inDegreesOf(graph, IndexedSeq.fill(max + 1)(0)).zipWithIndex
     val nodeWithInDegreeLTOutDegree_To = inDegrees.find {
       case (inDegree, node) ⇒ inDegree < graph(node).size
     }.get._2
