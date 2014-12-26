@@ -98,20 +98,48 @@ object Week4 {
       if (restGraph.map(_.size).sum == 0) {
         cycle
       } else {
-        val node: Int = cycle.find { node =>
+        val node: Int = cycle.find { node ⇒
           restGraph(node).size > 0
         }.get
         val nodeIndex = cycle.indexOf(node)
-        //println("nodeIndex = " + nodeIndex)
         val (newCycle, newRestGraph) = cycle_(node, restGraph, IndexedSeq(node))
-        //println(cycle(nodeIndex) + " " + newCycle.tail.mkString("->") + " " + cycle.drop(nodeIndex + 1).mkString("->") + " " + cycle.tail.take(nodeIndex).mkString("->"))
-        val mergedCycle = (cycle(nodeIndex) +: newCycle.tail) ++ cycle.drop(nodeIndex + 1) ++ cycle.tail.take(nodeIndex)
-        //println(mergedCycle.mkString("->"))
-        //println(newRestGraph)
+        val mergedCycle = newCycle ++
+          (if (nodeIndex < cycle.size) cycle.view(nodeIndex + 1, cycle.size) else Seq.empty[Int]) ++
+          (if (nodeIndex > 0) cycle.view(1, nodeIndex + 1) else Seq.empty[Int])
         eulerianCycle_(mergedCycle, newRestGraph)
       }
     }
     val (cycle, restGraph) = cycle_(0, graph, IndexedSeq(0))
     eulerianCycle_(cycle, restGraph)
+  }
+
+  def eulerianPath(graph: IndexedSeq[Seq[Int]]): IndexedSeq[Int] = {
+    @tailrec def increase(nodes: Seq[Int], indegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
+      if (nodes.isEmpty) indegrees
+      else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
+    }
+    @tailrec def inDegreesOf(graph: IndexedSeq[Seq[Int]], inDegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
+      if (graph.isEmpty) inDegrees
+      else {
+        inDegreesOf(graph.tail, increase(graph.head, inDegrees))
+      }
+    }
+    val inDegrees = inDegreesOf(graph, IndexedSeq.fill(graph.size)(0)).zipWithIndex
+    val nodeWithInDegreeLTOutDegree_To = inDegrees.find {
+      case (inDegree, node) ⇒ inDegree < graph(node).size
+    }.get._2
+    val nodeWithInDegreeGTOutDegree_From = inDegrees.find {
+      case (inDegree, node) ⇒ inDegree > graph(node).size
+    }.get._2
+    val adjustedGraph = graph.updated(nodeWithInDegreeGTOutDegree_From, nodeWithInDegreeLTOutDegree_To +: graph(nodeWithInDegreeGTOutDegree_From))
+    val cycle = eulerianCycle(adjustedGraph)
+    var cutPoint = -1
+    for (i ← 0 until cycle.size - 1) {
+      if (cycle(i) == nodeWithInDegreeGTOutDegree_From && cycle(i + 1) == nodeWithInDegreeLTOutDegree_To) {
+        cutPoint = i + 1
+      }
+    }
+    val (head, tail) = cycle.splitAt(cutPoint)
+    if (tail.size > 1) tail.init ++ head else tail ++ head.tail
   }
 }
