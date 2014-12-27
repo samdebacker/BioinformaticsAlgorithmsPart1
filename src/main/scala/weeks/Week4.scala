@@ -157,7 +157,7 @@ object Week4 {
   def kUniversalCirculairString(k: Int): String = {
     def binaryStrings: IndexedSeq[String] = {
       for {
-        n <- 0 to (math.pow(2, k).toInt - 1)
+        n ← 0 to (math.pow(2, k).toInt - 1)
       } yield n.toBinaryString.reverse.padTo(k, '0').reverse
     }
     def deBruijnFromKmers(kMers: IndexedSeq[String]): Map[String, IndexedSeq[String]] = {
@@ -167,8 +167,9 @@ object Week4 {
       } yield (kMer.take(k - 1), kMer.tail))
         .groupBy(_._1)
         .toIndexedSeq
-        .map { case (k,v) ⇒
-          (k, v.map(_._2))
+        .map {
+          case (k, v) ⇒
+            (k, v.map(_._2).sortBy(s ⇒ s))
         }
         .sortBy(_._1)
       Map(result: _*).withDefaultValue(IndexedSeq.empty)
