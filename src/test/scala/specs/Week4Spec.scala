@@ -86,7 +86,7 @@ class Week4Spec extends FeatureSpec {
     scenario("example") {
       import weeks.DNAString.StringToDNAString
       val patterns: DNAMotif = "ATGCG\nGCATG\nCATGC\nAGGCA\nGGCAT"
-      val result: IndexedSeq[(DNAString, DNAString)] = IndexedSeq("AGGCA".toDNA -> "GGCAT".toDNA, "CATGC".toDNA -> "ATGCG".toDNA, "GCATG".toDNA -> "CATGC".toDNA, "GGCAT".toDNA -> "GCATG".toDNA)
+      val result: IndexedSeq[(DNAString, DNAString)] = IndexedSeq("AGGCA".toDNA → "GGCAT".toDNA, "CATGC".toDNA → "ATGCG".toDNA, "GCATG".toDNA → "CATGC".toDNA, "GGCAT".toDNA → "GCATG".toDNA)
       overlap(patterns) shouldBe result
     }
 
@@ -97,7 +97,7 @@ class Week4Spec extends FeatureSpec {
       val patterns = DNAMotif.from(Source.fromFile("src/main/resources/overlapExtraDatasetInput.txt").getLines().mkString("\n")).get
       val expectedResult = Source.fromFile("src/main/resources/overlapExtraDatasetOutput.txt").getLines().map {
         case regex(left, right) ⇒
-          left.toDNA -> right.toDNA
+          left.toDNA → right.toDNA
       }.toIndexedSeq
       overlap(patterns) shouldBe expectedResult
     }
@@ -107,7 +107,7 @@ class Week4Spec extends FeatureSpec {
       val patterns = DNAMotif.from(Source.fromFile("src/main/resources/overlapInterativeQuizInput.txt").getLines().mkString("\n")).get
       val expectedResult = Source.fromFile("src/main/resources/overlapInterativeQuizOutput.txt").getLines().map {
         case regex(left, right) ⇒
-          left.toDNA -> right.toDNA
+          left.toDNA → right.toDNA
       }.toIndexedSeq
       overlap(patterns) shouldBe expectedResult
     }
@@ -118,7 +118,7 @@ class Week4Spec extends FeatureSpec {
     val regex = """(?i)([ACGT]+) -> ([ACGT,]+)""".r
     Map(Source.fromFile(fn).getLines().map {
       case regex(left, right) ⇒
-        left.toDNA -> right.split(',').toIndexedSeq.map(_.toDNA)
+        left.toDNA → right.split(',').toIndexedSeq.map(_.toDNA)
     }.toSeq: _*)
   }
 
@@ -128,15 +128,15 @@ class Week4Spec extends FeatureSpec {
       val text: DNAString = "AAGATTCTCTAAGA"
       val k = 4
       deBruijn(text, k) shouldBe Map(
-        "AAG".toDNA -> IndexedSeq("AGA".toDNA, "AGA".toDNA),
-        "AGA".toDNA -> IndexedSeq("GAT".toDNA),
-        "ATT".toDNA -> IndexedSeq("TTC".toDNA),
-        "CTA".toDNA -> IndexedSeq("TAA".toDNA),
-        "CTC".toDNA -> IndexedSeq("TCT".toDNA),
-        "GAT".toDNA -> IndexedSeq("ATT".toDNA),
-        "TAA".toDNA -> IndexedSeq("AAG".toDNA),
-        "TCT".toDNA -> IndexedSeq("CTA".toDNA, "CTC".toDNA),
-        "TTC".toDNA -> IndexedSeq("TCT".toDNA)
+        "AAG".toDNA → IndexedSeq("AGA".toDNA, "AGA".toDNA),
+        "AGA".toDNA → IndexedSeq("GAT".toDNA),
+        "ATT".toDNA → IndexedSeq("TTC".toDNA),
+        "CTA".toDNA → IndexedSeq("TAA".toDNA),
+        "CTC".toDNA → IndexedSeq("TCT".toDNA),
+        "GAT".toDNA → IndexedSeq("ATT".toDNA),
+        "TAA".toDNA → IndexedSeq("AAG".toDNA),
+        "TCT".toDNA → IndexedSeq("CTA".toDNA, "CTC".toDNA),
+        "TTC".toDNA → IndexedSeq("TCT".toDNA)
       )
     }
 
@@ -161,11 +161,11 @@ class Week4Spec extends FeatureSpec {
       import weeks.DNAString.StringToDNAString
       val kMers: DNAMotif = "GAGG\nCAGG\nGGGG\nGGGA\nCAGG\nAGGG\nGGAG"
       deBruijnFromKmers(kMers) shouldBe Map(
-        "AGG".toDNA -> IndexedSeq("GGG".toDNA),
-        "CAG".toDNA -> IndexedSeq("AGG".toDNA, "AGG".toDNA),
-        "GAG".toDNA -> IndexedSeq("AGG".toDNA),
-        "GGA".toDNA -> IndexedSeq("GAG".toDNA),
-        "GGG".toDNA -> IndexedSeq("GGA".toDNA, "GGG".toDNA)
+        "AGG".toDNA → IndexedSeq("GGG".toDNA),
+        "CAG".toDNA → IndexedSeq("AGG".toDNA, "AGG".toDNA),
+        "GAG".toDNA → IndexedSeq("AGG".toDNA),
+        "GGA".toDNA → IndexedSeq("GAG".toDNA),
+        "GGG".toDNA → IndexedSeq("GGA".toDNA, "GGG".toDNA)
       )
     }
 
@@ -188,23 +188,23 @@ class Week4Spec extends FeatureSpec {
     val regex = """(?i)(\d+) -> ([\d,]+)""".r
     Map(Source.fromFile(fn).getLines().map {
       case regex(left, right) ⇒
-        left.toInt -> right.split(',').toSeq.map(_.toInt)
+        left.toInt → right.split(',').toSeq.map(_.toInt)
     }.toSeq: _*).withDefaultValue(Seq.empty[Int])
   }
 
   feature("eulerianCycle") {
     scenario("example") {
       val graph = Map(
-        0 -> Seq(3),
-        1 -> Seq(0),
-        2 -> Seq(1, 6),
-        3 -> Seq(2),
-        4 -> Seq(2),
-        5 -> Seq(4),
-        6 -> Seq(5, 8),
-        7 -> Seq(9),
-        8 -> Seq(7),
-        9 -> Seq(6)
+        0 → Seq(3),
+        1 → Seq(0),
+        2 → Seq(1, 6),
+        3 → Seq(2),
+        4 → Seq(2),
+        5 → Seq(4),
+        6 → Seq(5, 8),
+        7 → Seq(9),
+        8 → Seq(7),
+        9 → Seq(6)
       )
       eulerianCycle(graph) shouldBe IndexedSeq(0, 3, 2, 6, 8, 7, 9, 6, 5, 4, 2, 1, 0)
     }
@@ -228,14 +228,14 @@ class Week4Spec extends FeatureSpec {
   feature("eulerianPath") {
     scenario("example") {
       val graph = Map(
-        0 -> Seq(2),
-        1 -> Seq(3),
-        2 -> Seq(1),
-        3 -> Seq(0, 4),
-        6 -> Seq(3, 7),
-        7 -> Seq(8),
-        8 -> Seq(9),
-        9 -> Seq(6)
+        0 → Seq(2),
+        1 → Seq(3),
+        2 → Seq(1),
+        3 → Seq(0, 4),
+        6 → Seq(3, 7),
+        7 → Seq(8),
+        8 → Seq(9),
+        9 → Seq(6)
       ).withDefaultValue(Seq.empty[Int])
       eulerianPath(graph) shouldBe IndexedSeq(6, 7, 8, 9, 6, 3, 0, 2, 1, 3, 4)
     }
