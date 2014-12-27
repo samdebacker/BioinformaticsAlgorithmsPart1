@@ -154,6 +154,7 @@ object Week4 {
     stringSpelledByGenomePath(DNAMotif.unsafeFrom(path))
   }
 
+  // /!\ NOT CORRECT
   def kUniversalCirculairString(k: Int): String = {
     def binaryStrings: IndexedSeq[String] = {
       for {
@@ -181,7 +182,12 @@ object Week4 {
       }.toString
     }
     val graph = deBruijnFromKmers(binaryStrings)
-    val cycle = eulerianCycle(graph)
-    stringSpelledByPath(cycle.tail) // It is a cycle so drop the 1st element
+    // remove reflective edges
+    val cleanedupGraph = for {
+      edges ← graph
+      fromNode = edges._1
+    } yield fromNode -> edges._2.filterNot(_ == fromNode)
+    val cycle = eulerianCycle(cleanedupGraph)
+    stringSpelledByPath(cycle.init) // It is a cycle so drop the last elementt
   }
 }
