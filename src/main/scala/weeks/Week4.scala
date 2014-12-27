@@ -94,7 +94,7 @@ object Week4 {
         cycle_(start, removedEdgeGraph, cycle :+ nextNode)
       }
     }
-    def eulerianCycle_(cycle: IndexedSeq[T], restGraph: Map[T, Seq[T]]): IndexedSeq[T] = {
+    @tailrec def eulerianCycle_(cycle: IndexedSeq[T], restGraph: Map[T, Seq[T]]): IndexedSeq[T] = {
       if (restGraph.values.map(_.size).sum == 0) {
         cycle
       } else {
@@ -114,28 +114,28 @@ object Week4 {
     eulerianCycle_(cycle, restGraph)
   }
 
-  def eulerianPath(graph: Map[Int, Seq[Int]]): IndexedSeq[Int] = {
-    @tailrec def increase(nodes: Seq[Int], indegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
+  def eulerianPath[T](graph: Map[T, Seq[T]]): IndexedSeq[T] = {
+    @tailrec def increase(nodes: Seq[T], indegrees: Map[T, Int]): Map[T, Int] = {
       if (nodes.isEmpty) indegrees
       else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
     }
-    @tailrec def inDegreesOf(graph: Map[Int, Seq[Int]], inDegrees: IndexedSeq[Int]): IndexedSeq[Int] = {
+    @tailrec def inDegreesOf(graph: Map[T, Seq[T]], inDegrees: Map[T, Int]): Map[T, Int] = {
       if (graph.isEmpty) inDegrees
       else {
         inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))
       }
     }
-    val max = (for {
+    val nodes = ((for {
       edges ← graph
       node ← edges._2
-    } yield node).max
-    val inDegrees = inDegreesOf(graph, IndexedSeq.fill(max + 1)(0)).zipWithIndex
+    } yield node) ++ graph.keys).toSet[T].toSeq
+    val inDegrees = inDegreesOf(graph, Map(nodes.map { node ⇒ (node, 0) }: _*))
     val nodeWithInDegreeLTOutDegree_To = inDegrees.find {
-      case (inDegree, node) ⇒ inDegree < graph(node).size
-    }.get._2
+      case (node, inDegree) ⇒ inDegree < graph(node).size
+    }.get._1
     val nodeWithInDegreeGTOutDegree_From = inDegrees.find {
-      case (inDegree, node) ⇒ inDegree > graph(node).size
-    }.get._2
+      case (node, inDegree) ⇒ inDegree > graph(node).size
+    }.get._1
     val adjustedGraph = graph.updated(nodeWithInDegreeGTOutDegree_From, nodeWithInDegreeLTOutDegree_To +: graph(nodeWithInDegreeGTOutDegree_From))
     val cycle = eulerianCycle(adjustedGraph)
     var cutPoint = -1
