@@ -25,9 +25,11 @@
 package weeks
 
 import scala.annotation.tailrec
+import scala.collection.immutable.ListMap
+import scala.util.Random
 
 object Week4 {
-  def compositionKmers(text: DNAString, k: Int) = {
+  def compositionKmers(text: DNAString, k: Int): IndexedSeq[DNAString] = {
     @tailrec def kMers_(text: String, result: IndexedSeq[DNAString]): IndexedSeq[DNAString] = {
       if (text.length < k)
         result
@@ -154,13 +156,12 @@ object Week4 {
     stringSpelledByGenomePath(DNAMotif.unsafeFrom(path))
   }
 
-  // /!\ NOT CORRECT
+  def binaryStrings(k: Int): IndexedSeq[String] = {
+    for {
+      n ← 0 to (math.pow(2, k).toInt - 1)
+    } yield n.toBinaryString.reverse.padTo(k, '0').reverse
+  }
   def kUniversalCirculairString(k: Int): String = {
-    def binaryStrings: IndexedSeq[String] = {
-      for {
-        n ← 0 to (math.pow(2, k).toInt - 1)
-      } yield n.toBinaryString.reverse.padTo(k, '0').reverse
-    }
     def deBruijnFromKmers(kMers: IndexedSeq[String]): Map[String, IndexedSeq[String]] = {
       val k = kMers.head.length
       val result = (for {
@@ -173,7 +174,47 @@ object Week4 {
             (k, v.map(_._2).sortBy(s ⇒ s))
         }
         .sortBy(_._1)
-      Map(result: _*).withDefaultValue(IndexedSeq.empty)
+      // /!\ using a ListMap here to preserve the insertion order
+      // that will let us start with the 000's which is a good candidate to find
+      // a CIRCULAR k-Universal String (faster), and reduces the number of possible answers
+      ListMap(result: _*).withDefaultValue(IndexedSeq.empty)
+    }
+    def generateKUniversalString(graph: Map[String, Seq[String]]): String = {
+      @tailrec def cycle_(start: String, graph: Map[String, Seq[String]], cycle: IndexedSeq[String]): (IndexedSeq[String], Map[String, Seq[String]]) = {
+        val selectableNodes = graph(cycle.last)
+        // Go randomly select a possible edge, we could do it exhaustively but we need to implement a backtracking algorithm
+        val nextNode = selectableNodes(Random.nextInt(selectableNodes.length))
+        val removedEdgeGraph: Map[String, Seq[String]] = graph.updated(cycle.last, selectableNodes.filterNot(_ == nextNode))
+        if (nextNode == start) {
+          (cycle :+ nextNode, removedEdgeGraph)
+        } else {
+          cycle_(start, removedEdgeGraph, cycle :+ nextNode)
+        }
+      }
+      @tailrec def eulerianCycle_(cycle: IndexedSeq[String], restGraph: Map[String, Seq[String]]): IndexedSeq[String] = {
+        if (restGraph.values.map(_.size).sum == 0) {
+          cycle
+        } else {
+          val node: String = cycle.find { node ⇒
+            restGraph(node).size > 0
+          }.get
+          val nodeIndex = cycle.indexOf(node)
+          val (newCycle, newRestGraph) = cycle_(node, restGraph, IndexedSeq(node))
+          val mergedCycle = (cycle.view(0, nodeIndex) ++ newCycle ++ cycle.view(nodeIndex + 1, cycle.size)).toIndexedSeq
+          eulerianCycle_(mergedCycle, newRestGraph)
+        }
+      }
+      var found = false
+      var candidate: String = null
+      while (!found) {
+        val firstNode: String = graph.head._1
+        val (cycle, restGraph) = cycle_(firstNode, graph, IndexedSeq(firstNode))
+        val currentCycle = eulerianCycle_(cycle, restGraph)
+        candidate = stringSpelledByPath(currentCycle)
+        found = candidate.endsWith(candidate.substring(0, k - 1)) // checks if we have a circular k-Universal String
+        //println(s"$candidate is $found")
+      }
+      candidate.substring(0, candidate.length - (k - 1))
     }
     def stringSpelledByPath(path: IndexedSeq[String]): String = {
       val k = path.head.length
@@ -181,13 +222,7 @@ object Week4 {
         acc.append(el.charAt(k - 1))
       }.toString
     }
-    val graph = deBruijnFromKmers(binaryStrings)
-    // remove reflective edges
-    val cleanedupGraph = for {
-      edges ← graph
-      fromNode = edges._1
-    } yield fromNode -> edges._2.filterNot(_ == fromNode)
-    val cycle = eulerianCycle(cleanedupGraph)
-    stringSpelledByPath(cycle.init) // It is a cycle so drop the last elementt
+    val graph = deBruijnFromKmers(binaryStrings(k))
+    generateKUniversalString(graph)
   }
 }

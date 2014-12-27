@@ -29,6 +29,7 @@ import org.scalatest.Matchers._
 import weeks.Week4._
 import weeks.{DNAMotif, DNAString}
 
+import scala.annotation.tailrec
 import scala.io.Source
 
 class Week4Spec extends FeatureSpec {
@@ -277,22 +278,40 @@ class Week4Spec extends FeatureSpec {
   }
 
   feature("kUniversalCirculairString") {
-    // /!\ NOT CORRECT
-
-    ignore("example") {
-      kUniversalCirculairString(4) shouldBe ""
+    def decomposeKUniversalCircular(kUniversalCircular: String, k: Int): Set[String] = {
+      @tailrec def decomposeKUniversalCircular_(string: String, result: Set[String]): Set[String] = {
+        if (string.length < k)
+          result
+        else
+          decomposeKUniversalCircular_(string.tail, result + string.substring(0, k))
+      }
+      decomposeKUniversalCircular_(kUniversalCircular + kUniversalCircular.substring(0, k - 1), Set.empty[String])
     }
 
-    ignore("extra dataset") {
-      kUniversalCirculairString(14) shouldBe ""
+    scenario("example") {
+      val k = 4
+      val result = kUniversalCirculairString(k)
+      decomposeKUniversalCircular(result, k) shouldBe binaryStrings(k).toSet
     }
 
-    ignore("interactive quiz") {
-      kUniversalCirculairString(9) shouldBe ""
+    scenario("extra dataset") {
+      val k = 14
+      val result = kUniversalCirculairString(k)
+      decomposeKUniversalCircular(result, k) shouldBe binaryStrings(k).toSet
     }
 
-    ignore("interactive quiz 2") {
-      kUniversalCirculairString(8) shouldBe ""
+    scenario("interactive quiz") {
+      val k = 9
+      val result = kUniversalCirculairString(k)
+      //println(result)
+      decomposeKUniversalCircular(result, k) shouldBe binaryStrings(k).toSet
+    }
+
+    scenario("interactive quiz 2") {
+      val k = 8
+      val result = kUniversalCirculairString(k)
+      //println(result)
+      decomposeKUniversalCircular(result, k) shouldBe binaryStrings(k).toSet
     }
   }
 }
