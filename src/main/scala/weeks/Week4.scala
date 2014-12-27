@@ -52,9 +52,9 @@ object Week4 {
     } yield (p, q)).sortBy { case (l, _) ⇒ l.value }
   }
 
-  def deBruijn(text: DNAString, k: Int): IndexedSeq[(DNAString, IndexedSeq[DNAString])] = {
+  def deBruijn(text: DNAString, k: Int): Map[DNAString, IndexedSeq[DNAString]] = {
     import weeks.DNAString.StringToDNAString
-    (for {
+    val result = (for {
       p ← compositionKmers(text, k)
     } yield (p.value.take(k - 1).toDNA, p.value.tail.toDNA))
       .groupBy(_._1.value)
@@ -64,12 +64,13 @@ object Week4 {
           (k.toDNA, v.map(_._2))
       }
       .sortBy { case (k, _) ⇒ k.value }
+    Map(result: _*)
   }
 
-  def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false): IndexedSeq[(DNAString, IndexedSeq[DNAString])] = {
+  def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false): Map[DNAString, IndexedSeq[DNAString]] = {
     import weeks.DNAString.StringToDNAString
     val k = kMers.k
-    (for {
+    val result = (for {
       kMer ← kMers.value
     } yield (kMer.value.take(k - 1).toDNA, kMer.value.tail.toDNA))
       .groupBy(_._1.value)
@@ -82,6 +83,7 @@ object Week4 {
             (k.toDNA, v.map(_._2).sortBy(_.value))
       }
       .sortBy { case (k, _) ⇒ k.value }
+    Map(result: _*).withDefaultValue(IndexedSeq.empty)
   }
 
   def eulerianCycle[T](graph: Map[T, Seq[T]]): IndexedSeq[T] = {
@@ -146,5 +148,11 @@ object Week4 {
     }
     val (head, tail) = cycle.splitAt(cutPoint)
     if (tail.size > 1) tail.init ++ head else tail ++ head.tail
+  }
+
+  def stringReconstruction(kMers: DNAMotif): DNAString = {
+    val graph = deBruijnFromKmers(kMers)
+    val path = eulerianPath(graph)
+    stringSpelledByGenomePath(DNAMotif.unsafeFrom(path))
   }
 }
