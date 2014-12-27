@@ -105,9 +105,7 @@ object Week4 {
         }.get
         val nodeIndex = cycle.indexOf(node)
         val (newCycle, newRestGraph) = cycle_(node, restGraph, IndexedSeq(node))
-        val mergedCycle = newCycle ++
-          (if (nodeIndex < cycle.size) cycle.view(nodeIndex + 1, cycle.size) else Seq.empty[T]) ++
-          (if (nodeIndex > 0) cycle.view(1, nodeIndex + 1) else Seq.empty[T])
+        val mergedCycle = (cycle.view(0, nodeIndex) ++ newCycle ++ cycle.view(nodeIndex + 1, cycle.size)).toIndexedSeq
         eulerianCycle_(mergedCycle, newRestGraph)
       }
     }
@@ -154,5 +152,35 @@ object Week4 {
     val graph = deBruijnFromKmers(kMers)
     val path = eulerianPath(graph)
     stringSpelledByGenomePath(DNAMotif.unsafeFrom(path))
+  }
+
+  def kUniversalCirculairString(k: Int): String = {
+    def binaryStrings: IndexedSeq[String] = {
+      for {
+        n <- 0 to (math.pow(2, k).toInt - 1)
+      } yield n.toBinaryString.reverse.padTo(k, '0').reverse
+    }
+    def deBruijnFromKmers(kMers: IndexedSeq[String]): Map[String, IndexedSeq[String]] = {
+      val k = kMers.head.length
+      val result = (for {
+        kMer ← kMers
+      } yield (kMer.take(k - 1), kMer.tail))
+        .groupBy(_._1)
+        .toIndexedSeq
+        .map { case (k,v) ⇒
+          (k, v.map(_._2))
+        }
+        .sortBy(_._1)
+      Map(result: _*).withDefaultValue(IndexedSeq.empty)
+    }
+    def stringSpelledByPath(path: IndexedSeq[String]): String = {
+      val k = path.head.length
+      path.tail.foldLeft(new StringBuilder(path.head)) { (acc, el) ⇒
+        acc.append(el.charAt(k - 1))
+      }.toString
+    }
+    val graph = deBruijnFromKmers(binaryStrings)
+    val cycle = eulerianCycle(graph)
+    stringSpelledByPath(cycle.tail) // It is a cycle so drop the 1st element
   }
 }
