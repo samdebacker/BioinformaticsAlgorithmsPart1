@@ -225,4 +225,46 @@ object Week4 {
     val graph = deBruijnFromKmers(binaryStrings(k))
     generateKUniversalString(graph)
   }
+
+  def pairedCompostion(k: Int, d: Int)(text: DNAString): IndexedSeq[(DNAString, DNAString)] = {
+    val t = text.value
+    (for {
+      i ← 0 to t.length - (2 * k + d)
+    } yield (t.substring(i, i + k), t.substring(i + k + d, i + k + d + k)))
+      .sorted
+      .map { case (l, r) ⇒ (DNAString.unsafeFrom(l), DNAString.unsafeFrom(r)) }
+  }
+
+  def stringSpelledByKDmerPath(k: Int, d: Int)(path: IndexedSeq[(DNAString, DNAString)]): DNAString = {
+    val addLastCharacter = { (acc: StringBuilder, el: String) ⇒ acc.append(el.charAt(k - 1)) }
+    val left = path.map(_._1.value)
+    var builder = left.tail.foldLeft(new StringBuilder(left.head))(addLastCharacter)
+    val right = path.view(path.length - d - k, path.length).map(_._2.value)
+    builder = right.foldLeft(builder)(addLastCharacter)
+    DNAString.unsafeFrom(builder.toString())
+  }
+
+  def stringReconstructionFromKDMers(k: Int, d: Int)(kdMers: IndexedSeq[(DNAString, DNAString)]): DNAString = {
+    def deBruijnFromKDmers: Map[(DNAString, DNAString), IndexedSeq[(DNAString, DNAString)]] = {
+      val result = (for {
+        (left, right) ← kdMers
+      } yield ((left.value.take(k - 1), right.value.take(k - 1)), (left.value.tail, right.value.tail)))
+        .groupBy(_._1)
+        .toIndexedSeq
+        .sortBy { case (k, _) ⇒ k }
+        .map {
+          case (k, v) ⇒
+            ((DNAString.unsafeFrom(k._1), DNAString.unsafeFrom(k._2)),
+              v.sortBy(_._2).map {
+                case (_, (l, r)) ⇒
+                  (DNAString.unsafeFrom(l), DNAString.unsafeFrom(r))
+              })
+        }
+      Map(result: _*).withDefaultValue(IndexedSeq.empty[(DNAString, DNAString)])
+    }
+
+    val graph = deBruijnFromKDmers
+    val path = eulerianPath(graph)
+    stringSpelledByKDmerPath(k - 1, d + 1)(path)
+  }
 }
