@@ -256,8 +256,7 @@ object Week4 {
     stringSpelledByKDmerPath(k - 1, d + 1)(path)
   }
 
-  /*
-  def maximalNonBranchingPaths[T](graph: Map[T, Seq[T]]): Set[Seq[T]] = {
+  def maximalNonBranchingPaths[T: Ordering](graph: Map[T, Seq[T]]): Set[Seq[T]] = {
     @tailrec def increase(nodes: Seq[T], indegrees: Map[T, Int]): Map[T, Int] = {
       if (nodes.isEmpty) indegrees
       else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
@@ -268,36 +267,48 @@ object Week4 {
         inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))
       }
     }
+
     val nodes = ((for {
       edges ← graph
       node ← edges._2
     } yield node) ++ graph.keys).toSet[T].toSeq
     val inDegrees = inDegreesOf(graph, Map(nodes.map { node ⇒ (node, 0) }: _*))
+    val completedGraph = graph.withDefaultValue(Seq.empty[T])
 
-    val startNodes = inDegrees.filter { case (node, inDegree) ⇒
-      val outDegree = graph(node).size
-      outDegree > 0 && inDegree != 1
-    }
-    startNodes.foldLeft(Set.empty[Seq[T]]) { case (paths, (node, _)) ⇒
-      constructPath
+    @tailrec def extendPath(path: Seq[T]): Seq[T] = {
+      if (inDegrees(path.last) != 1 || completedGraph(path.last).size != 1) path
+      else extendPath(path :+ completedGraph(path.last).head)
     }
 
-    val nodeWithInDegreeLTOutDegree_To = inDegrees.find {
-      case (node, inDegree) ⇒ inDegree < graph(node).size
-    }.get._1
-    val nodeWithInDegreeGTOutDegree_From = inDegrees.find {
-      case (node, inDegree) ⇒ inDegree > graph(node).size
-    }.get._1
-    val adjustedGraph = graph.updated(nodeWithInDegreeGTOutDegree_From, nodeWithInDegreeLTOutDegree_To +: graph(nodeWithInDegreeGTOutDegree_From))
-    val cycle = eulerianCycle(adjustedGraph)
-    var cutPoint = -1
-    for (i ← 0 until cycle.size - 1) {
-      if (cycle(i) == nodeWithInDegreeGTOutDegree_From && cycle(i + 1) == nodeWithInDegreeLTOutDegree_To) {
-        cutPoint = i + 1
+    val startNodes = inDegrees.filter {
+      case (node, inDegree) ⇒
+        val outDegree = completedGraph(node).size
+        (inDegree != 1 || outDegree != 1) && outDegree > 0
+    }.keys
+    val paths = startNodes.foldLeft(Set.empty[Seq[T]]) { (paths, fromNode) ⇒
+      completedGraph(fromNode).foldLeft(paths) { (paths, toNode) ⇒
+        paths + extendPath(Seq(fromNode, toNode))
       }
     }
-    val (head, tail) = cycle.splitAt(cutPoint)
-    if (tail.size > 1) tail.init ++ head else tail ++ head.tail
+
+    // And add the isolated cycles
+    val leftOvers: Set[T] = inDegrees.keySet.diff(paths.flatten)
+    @tailrec def cycle_(cycle: Seq[T]): Seq[T] = {
+      val nextNode = graph(cycle.last).head
+      if (nextNode == cycle.head) {
+        cycle :+ nextNode
+      } else {
+        cycle_(cycle :+ nextNode)
+      }
+    }
+    @tailrec def addIsolatedCycles(paths: Set[Seq[T]], leftOvers: Set[T]): Set[Seq[T]] = {
+      if (leftOvers.isEmpty) paths
+      else {
+        val start = leftOvers.min
+        val cycle = cycle_(Seq(start))
+        addIsolatedCycles(paths + cycle, leftOvers -- cycle)
+      }
+    }
+    addIsolatedCycles(paths, leftOvers)
   }
-  */
 }
