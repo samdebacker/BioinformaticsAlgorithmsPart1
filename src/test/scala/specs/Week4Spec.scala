@@ -27,7 +27,7 @@ package specs
 import org.scalatest.FeatureSpec
 import org.scalatest.Matchers._
 import weeks.Week4._
-import weeks.{DNAMotif, DNAString}
+import weeks.{ DNAMotif, DNAString }
 
 import scala.annotation.tailrec
 import scala.io.Source
@@ -84,59 +84,59 @@ class Week4Spec extends FeatureSpec {
 
   feature("overlap") {
     scenario("example") {
-      import weeks.DNAString.StringToDNAString
       val patterns: DNAMotif = "ATGCG\nGCATG\nCATGC\nAGGCA\nGGCAT"
-      val result: IndexedSeq[(DNAString, DNAString)] = IndexedSeq("AGGCA".toDNA → "GGCAT".toDNA, "CATGC".toDNA → "ATGCG".toDNA, "GCATG".toDNA → "CATGC".toDNA, "GGCAT".toDNA → "GCATG".toDNA)
+      val result: IndexedSeq[(DNAString, DNAString)] = IndexedSeq(
+        DNAString("AGGCA") → DNAString("GGCAT"),
+        DNAString("CATGC") → DNAString("ATGCG"),
+        DNAString("GCATG") → DNAString("CATGC"),
+        DNAString("GGCAT") → DNAString("GCATG")
+      )
       overlap(patterns) shouldBe result
     }
 
-    val regex = """(?i)([ACGT]+) -> ([ACGT]+)""".r
+    lazy val regex = """(?i)([ACGT]+) -> ([ACGT]+)""".r
+    def load(fn: String): IndexedSeq[(DNAString, DNAString)] = {
+      Source.fromFile(fn).getLines().map {
+        case regex(left, right) ⇒
+          DNAString.unsafeFrom(left) → DNAString.unsafeFrom(right)
+      }.toIndexedSeq
+    }
 
     scenario("extra dataset") {
-      import weeks.DNAString.StringToDNAString
       val patterns = DNAMotif.from(Source.fromFile("src/main/resources/overlapExtraDatasetInput.txt").getLines().mkString("\n")).get
-      val expectedResult = Source.fromFile("src/main/resources/overlapExtraDatasetOutput.txt").getLines().map {
-        case regex(left, right) ⇒
-          left.toDNA → right.toDNA
-      }.toIndexedSeq
+      val expectedResult = load("src/main/resources/overlapExtraDatasetOutput.txt")
       overlap(patterns) shouldBe expectedResult
     }
 
     scenario("interactive quiz") {
-      import weeks.DNAString.StringToDNAString
       val patterns = DNAMotif.from(Source.fromFile("src/main/resources/overlapInterativeQuizInput.txt").getLines().mkString("\n")).get
-      val expectedResult = Source.fromFile("src/main/resources/overlapInterativeQuizOutput.txt").getLines().map {
-        case regex(left, right) ⇒
-          left.toDNA → right.toDNA
-      }.toIndexedSeq
+      val expectedResult = load("src/main/resources/overlapInterativeQuizOutput.txt")
       overlap(patterns) shouldBe expectedResult
     }
   }
 
   def loadGraphOfDNAStrings(fn: String): Map[DNAString, IndexedSeq[DNAString]] = {
-    import weeks.DNAString.StringToDNAString
     val regex = """(?i)([ACGT]+) -> ([ACGT,]+)""".r
     Map(Source.fromFile(fn).getLines().map {
       case regex(left, right) ⇒
-        left.toDNA → right.split(',').toIndexedSeq.map(_.toDNA)
+        DNAString.unsafeFrom(left) → right.split(',').toIndexedSeq.map(DNAString.unsafeFrom(_))
     }.toSeq: _*)
   }
 
   feature("deBruijn") {
     scenario("example") {
-      import weeks.DNAString.StringToDNAString
       val text: DNAString = "AAGATTCTCTAAGA"
       val k = 4
       deBruijn(text, k) shouldBe Map(
-        "AAG".toDNA → IndexedSeq("AGA".toDNA, "AGA".toDNA),
-        "AGA".toDNA → IndexedSeq("GAT".toDNA),
-        "ATT".toDNA → IndexedSeq("TTC".toDNA),
-        "CTA".toDNA → IndexedSeq("TAA".toDNA),
-        "CTC".toDNA → IndexedSeq("TCT".toDNA),
-        "GAT".toDNA → IndexedSeq("ATT".toDNA),
-        "TAA".toDNA → IndexedSeq("AAG".toDNA),
-        "TCT".toDNA → IndexedSeq("CTA".toDNA, "CTC".toDNA),
-        "TTC".toDNA → IndexedSeq("TCT".toDNA)
+        DNAString("AAG") → IndexedSeq(DNAString("AGA"), DNAString("AGA")),
+        DNAString("AGA") → IndexedSeq(DNAString("GAT")),
+        DNAString("ATT") → IndexedSeq(DNAString("TTC")),
+        DNAString("CTA") → IndexedSeq(DNAString("TAA")),
+        DNAString("CTC") → IndexedSeq(DNAString("TCT")),
+        DNAString("GAT") → IndexedSeq(DNAString("ATT")),
+        DNAString("TAA") → IndexedSeq(DNAString("AAG")),
+        DNAString("TCT") → IndexedSeq(DNAString("CTA"), DNAString("CTC")),
+        DNAString("TTC") → IndexedSeq(DNAString("TCT"))
       )
     }
 
@@ -158,14 +158,13 @@ class Week4Spec extends FeatureSpec {
 
   feature("deBruijnFromKmers") {
     scenario("example") {
-      import weeks.DNAString.StringToDNAString
       val kMers: DNAMotif = "GAGG\nCAGG\nGGGG\nGGGA\nCAGG\nAGGG\nGGAG"
       deBruijnFromKmers(kMers) shouldBe Map(
-        "AGG".toDNA → IndexedSeq("GGG".toDNA),
-        "CAG".toDNA → IndexedSeq("AGG".toDNA, "AGG".toDNA),
-        "GAG".toDNA → IndexedSeq("AGG".toDNA),
-        "GGA".toDNA → IndexedSeq("GAG".toDNA),
-        "GGG".toDNA → IndexedSeq("GGA".toDNA, "GGG".toDNA)
+        DNAString("AGG") → IndexedSeq(DNAString("GGG")),
+        DNAString("CAG") → IndexedSeq(DNAString("AGG"), DNAString("AGG")),
+        DNAString("GAG") → IndexedSeq(DNAString("AGG")),
+        DNAString("GGA") → IndexedSeq(DNAString("GAG")),
+        DNAString("GGG") → IndexedSeq(DNAString("GGA"), DNAString("GGG"))
       )
     }
 
@@ -325,15 +324,15 @@ class Week4Spec extends FeatureSpec {
   feature("stringSpelledByKDmerPath") {
     scenario("interactive quiz") {
       val path = IndexedSeq(
-        (DNAString("AG"),DNAString("AG")),
-        (DNAString("GC"),DNAString("GC")),
-        (DNAString("CA"),DNAString("CT")),
-        (DNAString("AG"),DNAString("TG")),
-        (DNAString("GC"),DNAString("GC")),
-        (DNAString("CT"),DNAString("CT")),
-        (DNAString("TG"),DNAString("TG")),
-        (DNAString("GC"),DNAString("GC")),
-        (DNAString("CT"),DNAString("CA"))
+        (DNAString("AG"), DNAString("AG")),
+        (DNAString("GC"), DNAString("GC")),
+        (DNAString("CA"), DNAString("CT")),
+        (DNAString("AG"), DNAString("TG")),
+        (DNAString("GC"), DNAString("GC")),
+        (DNAString("CT"), DNAString("CT")),
+        (DNAString("TG"), DNAString("TG")),
+        (DNAString("GC"), DNAString("GC")),
+        (DNAString("CT"), DNAString("CA"))
       )
       stringSpelledByKDmerPath(2, 1)(path) shouldBe DNAString("AGCAGCTGCTGCA")
     }
@@ -342,15 +341,15 @@ class Week4Spec extends FeatureSpec {
   feature("stringReconstructionFromKDMers") {
     scenario("example") {
       val kdMers = IndexedSeq(
-        (DNAString("GAGA"),DNAString("TTGA")),
-        (DNAString("TCGT"),DNAString("GATG")),
-        (DNAString("CGTG"),DNAString("ATGT")),
-        (DNAString("TGGT"),DNAString("TGAG")),
-        (DNAString("GTGA"),DNAString("TGTT")),
-        (DNAString("GTGG"),DNAString("GTGA")),
-        (DNAString("TGAG"),DNAString("GTTG")),
-        (DNAString("GGTC"),DNAString("GAGA")),
-        (DNAString("GTCG"),DNAString("AGAT"))
+        (DNAString("GAGA"), DNAString("TTGA")),
+        (DNAString("TCGT"), DNAString("GATG")),
+        (DNAString("CGTG"), DNAString("ATGT")),
+        (DNAString("TGGT"), DNAString("TGAG")),
+        (DNAString("GTGA"), DNAString("TGTT")),
+        (DNAString("GTGG"), DNAString("GTGA")),
+        (DNAString("TGAG"), DNAString("GTTG")),
+        (DNAString("GGTC"), DNAString("GAGA")),
+        (DNAString("GTCG"), DNAString("AGAT"))
       )
       val expectedResult: DNAString = "GGCTTACCA"
       stringReconstructionFromKDMers(4, 2)(kdMers) shouldBe DNAString("GTGGTCGTGAGATGTTGA")

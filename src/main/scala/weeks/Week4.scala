@@ -51,38 +51,33 @@ object Week4 {
     (for {
       p ← patterns.value
       q ← patterns.value if q.value.take(k - 1) == p.value.tail
-    } yield (p, q)).sortBy { case (l, _) ⇒ l.value }
+    } yield (p, q))
+      .sortBy { case (l, _) ⇒ l.value }
   }
 
   def deBruijn(text: DNAString, k: Int): Map[DNAString, IndexedSeq[DNAString]] = {
-    import weeks.DNAString.StringToDNAString
-    val result = (for {
-      p ← compositionKmers(text, k)
-    } yield (p.value.take(k - 1).toDNA, p.value.tail.toDNA))
-      .groupBy(_._1.value)
+    val result = (for (p ← compositionKmers(text, k)) yield (DNAString.unsafeFrom(p.value.take(k - 1)), DNAString.unsafeFrom(p.value.tail)))
+      .groupBy(_._1)
       .toIndexedSeq
       .map {
         case (k, v) ⇒
-          (k.toDNA, v.map(_._2))
+          (k, v.map(_._2))
       }
       .sortBy { case (k, _) ⇒ k.value }
     Map(result: _*)
   }
 
   def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false): Map[DNAString, IndexedSeq[DNAString]] = {
-    import weeks.DNAString.StringToDNAString
     val k = kMers.k
-    val result = (for {
-      kMer ← kMers.value
-    } yield (kMer.value.take(k - 1).toDNA, kMer.value.tail.toDNA))
-      .groupBy(_._1.value)
+    val result = (for (kMer ← kMers.value) yield (DNAString.unsafeFrom(kMer.value.take(k - 1)), DNAString.unsafeFrom(kMer.value.tail)))
+      .groupBy(_._1)
       .toIndexedSeq
       .map {
         case (k, v) ⇒
           if (sort)
-            (k.toDNA, v.map(_._2))
+            (k, v.map(_._2))
           else
-            (k.toDNA, v.map(_._2).sortBy(_.value))
+            (k, v.map(_._2).sortBy(_.value))
       }
       .sortBy { case (k, _) ⇒ k.value }
     Map(result: _*).withDefaultValue(IndexedSeq.empty)
@@ -157,16 +152,12 @@ object Week4 {
   }
 
   def binaryStrings(k: Int): IndexedSeq[String] = {
-    for {
-      n ← 0 to (math.pow(2, k).toInt - 1)
-    } yield n.toBinaryString.reverse.padTo(k, '0').reverse
+    for (n ← 0 to (math.pow(2, k).toInt - 1)) yield n.toBinaryString.reverse.padTo(k, '0').reverse
   }
   def kUniversalCirculairString(k: Int): String = {
     def deBruijnFromKmers(kMers: IndexedSeq[String]): Map[String, IndexedSeq[String]] = {
       val k = kMers.head.length
-      val result = (for {
-        kMer ← kMers
-      } yield (kMer.take(k - 1), kMer.tail))
+      val result = (for (kMer ← kMers) yield (kMer.take(k - 1), kMer.tail))
         .groupBy(_._1)
         .toIndexedSeq
         .map {
@@ -204,6 +195,7 @@ object Week4 {
           eulerianCycle_(mergedCycle, newRestGraph)
         }
       }
+      // Loop until we have a good candidate (would be nice to walk all the possible path in a deterministic way)
       var found = false
       var candidate: String = null
       while (!found) {
@@ -228,9 +220,7 @@ object Week4 {
 
   def pairedCompostion(k: Int, d: Int)(text: DNAString): IndexedSeq[(DNAString, DNAString)] = {
     val t = text.value
-    (for {
-      i ← 0 to t.length - (2 * k + d)
-    } yield (t.substring(i, i + k), t.substring(i + k + d, i + k + d + k)))
+    (for (i ← 0 to t.length - (2 * k + d)) yield (t.substring(i, i + k), t.substring(i + k + d, i + k + d + k)))
       .sorted
       .map { case (l, r) ⇒ (DNAString.unsafeFrom(l), DNAString.unsafeFrom(r)) }
   }
@@ -246,9 +236,7 @@ object Week4 {
 
   def stringReconstructionFromKDMers(k: Int, d: Int)(kdMers: IndexedSeq[(DNAString, DNAString)]): DNAString = {
     def deBruijnFromKDmers: Map[(DNAString, DNAString), IndexedSeq[(DNAString, DNAString)]] = {
-      val result = (for {
-        (left, right) ← kdMers
-      } yield ((left.value.take(k - 1), right.value.take(k - 1)), (left.value.tail, right.value.tail)))
+      val result = (for ((left, right) ← kdMers) yield ((left.value.take(k - 1), right.value.take(k - 1)), (left.value.tail, right.value.tail)))
         .groupBy(_._1)
         .toIndexedSeq
         .sortBy { case (k, _) ⇒ k }

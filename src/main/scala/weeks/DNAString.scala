@@ -48,15 +48,6 @@ object DNAString {
   import scala.language.experimental.macros
   import scala.language.implicitConversions
   implicit def apply(value: String): DNAString = macro DNAStringMacro.applyMacro
-
-  implicit class StringToDNAString(val s: String) extends AnyVal {
-    @inline def toDNA: DNAString = from(s).get
-  }
-
-  // Non-working experiment
-  implicit class DNAStringInterpolator(val sc: StringContext) extends AnyVal {
-    def dnaM(args: Any*): DNAString = macro DNAStringMacro.dnaMacro
-  }
 }
 
 final class DNAString private[weeks] (val value: String) extends AnyVal {
