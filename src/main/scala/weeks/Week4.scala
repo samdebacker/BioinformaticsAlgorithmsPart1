@@ -255,4 +255,49 @@ object Week4 {
     val path = eulerianPath(graph)
     stringSpelledByKDmerPath(k - 1, d + 1)(path)
   }
+
+  /*
+  def maximalNonBranchingPaths[T](graph: Map[T, Seq[T]]): Set[Seq[T]] = {
+    @tailrec def increase(nodes: Seq[T], indegrees: Map[T, Int]): Map[T, Int] = {
+      if (nodes.isEmpty) indegrees
+      else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
+    }
+    @tailrec def inDegreesOf(graph: Map[T, Seq[T]], inDegrees: Map[T, Int]): Map[T, Int] = {
+      if (graph.isEmpty) inDegrees
+      else {
+        inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))
+      }
+    }
+    val nodes = ((for {
+      edges ← graph
+      node ← edges._2
+    } yield node) ++ graph.keys).toSet[T].toSeq
+    val inDegrees = inDegreesOf(graph, Map(nodes.map { node ⇒ (node, 0) }: _*))
+
+    val startNodes = inDegrees.filter { case (node, inDegree) ⇒
+      val outDegree = graph(node).size
+      outDegree > 0 && inDegree != 1
+    }
+    startNodes.foldLeft(Set.empty[Seq[T]]) { case (paths, (node, _)) ⇒
+      constructPath
+    }
+
+    val nodeWithInDegreeLTOutDegree_To = inDegrees.find {
+      case (node, inDegree) ⇒ inDegree < graph(node).size
+    }.get._1
+    val nodeWithInDegreeGTOutDegree_From = inDegrees.find {
+      case (node, inDegree) ⇒ inDegree > graph(node).size
+    }.get._1
+    val adjustedGraph = graph.updated(nodeWithInDegreeGTOutDegree_From, nodeWithInDegreeLTOutDegree_To +: graph(nodeWithInDegreeGTOutDegree_From))
+    val cycle = eulerianCycle(adjustedGraph)
+    var cutPoint = -1
+    for (i ← 0 until cycle.size - 1) {
+      if (cycle(i) == nodeWithInDegreeGTOutDegree_From && cycle(i + 1) == nodeWithInDegreeLTOutDegree_To) {
+        cutPoint = i + 1
+      }
+    }
+    val (head, tail) = cycle.splitAt(cutPoint)
+    if (tail.size > 1) tail.init ++ head else tail ++ head.tail
+  }
+  */
 }
