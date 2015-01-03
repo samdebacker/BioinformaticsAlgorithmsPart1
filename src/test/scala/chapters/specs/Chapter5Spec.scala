@@ -26,7 +26,7 @@ package specs
 
 import chapters.Chapter5._
 import chapters.DNAString
-import org.scalatest.{FeatureSpec, Matchers}
+import org.scalatest.{ FeatureSpec, Matchers }
 
 class Chapter5Spec extends FeatureSpec with Matchers {
   feature("dpChange") {

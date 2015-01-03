@@ -26,8 +26,8 @@ package specs
 
 import chapters.Chapter4._
 import chapters.DNAString._
-import chapters.{DNAMotif, DNAString}
-import org.scalatest.{FeatureSpec, Matchers}
+import chapters.{ DNAMotif, DNAString }
+import org.scalatest.{ FeatureSpec, Matchers }
 
 import scala.annotation.tailrec
 import scala.io.Source
