@@ -10,6 +10,7 @@ class FullSpec extends Spec {
     new Chapter1Spec,
     new Chapter2Spec,
     new Chapter3Spec,
-    new Chapter4Spec
+    new Chapter4Spec,
+    new Chapter5Spec
   )
 }
