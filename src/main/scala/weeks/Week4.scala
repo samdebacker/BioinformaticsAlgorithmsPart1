@@ -67,18 +67,12 @@ object Week4 {
     Map(result: _*)
   }
 
-  def deBruijnFromKmers(kMers: DNAMotif, sort: Boolean = false): Map[DNAString, IndexedSeq[DNAString]] = {
+  def deBruijnFromKmers(kMers: DNAMotif): Map[DNAString, IndexedSeq[DNAString]] = {
     val k = kMers.k
     val result = (for (kMer ← kMers.value) yield (DNAString.unsafeFrom(kMer.value.take(k - 1)), DNAString.unsafeFrom(kMer.value.tail)))
       .groupBy(_._1)
       .toIndexedSeq
-      .map {
-        case (k, v) ⇒
-          if (sort)
-            (k, v.map(_._2))
-          else
-            (k, v.map(_._2).sortBy(_.value))
-      }
+      .map { case (k, v) ⇒ (k, v.map(_._2).sortBy(_.value)) }
       .sortBy { case (k, _) ⇒ k.value }
     Map(result: _*).withDefaultValue(IndexedSeq.empty)
   }
@@ -256,7 +250,7 @@ object Week4 {
     stringSpelledByKDmerPath(k - 1, d + 1)(path)
   }
 
-  def maximalNonBranchingPaths[T: Ordering](graph: Map[T, Seq[T]]): Set[Seq[T]] = {
+  def maximalNonBranchingPaths[T: Ordering](graph: Map[T, Seq[T]]): Seq[Seq[T]] = {
     @tailrec def increase(nodes: Seq[T], indegrees: Map[T, Int]): Map[T, Int] = {
       if (nodes.isEmpty) indegrees
       else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
@@ -285,14 +279,14 @@ object Week4 {
         val outDegree = completedGraph(node).size
         (inDegree != 1 || outDegree != 1) && outDegree > 0
     }.keys
-    val paths = startNodes.foldLeft(Set.empty[Seq[T]]) { (paths, fromNode) ⇒
+    val paths = startNodes.foldLeft(Seq.empty[Seq[T]]) { (paths, fromNode) ⇒
       completedGraph(fromNode).foldLeft(paths) { (paths, toNode) ⇒
-        paths + extendPath(Seq(fromNode, toNode))
+        paths :+ extendPath(Seq(fromNode, toNode))
       }
     }
 
     // And add the isolated cycles
-    val leftOvers: Set[T] = inDegrees.keySet.diff(paths.flatten)
+    val leftOvers: Set[T] = inDegrees.keySet.diff(paths.flatten.toSet)
     @tailrec def cycle_(cycle: Seq[T]): Seq[T] = {
       val nextNode = graph(cycle.last).head
       if (nextNode == cycle.head) {
@@ -301,14 +295,19 @@ object Week4 {
         cycle_(cycle :+ nextNode)
       }
     }
-    @tailrec def addIsolatedCycles(paths: Set[Seq[T]], leftOvers: Set[T]): Set[Seq[T]] = {
+    @tailrec def addIsolatedCycles(paths: Seq[Seq[T]], leftOvers: Set[T]): Seq[Seq[T]] = {
       if (leftOvers.isEmpty) paths
       else {
         val start = leftOvers.min
         val cycle = cycle_(Seq(start))
-        addIsolatedCycles(paths + cycle, leftOvers -- cycle)
+        addIsolatedCycles(paths :+ cycle, leftOvers -- cycle)
       }
     }
     addIsolatedCycles(paths, leftOvers)
+  }
+
+  def contigs(kMers: DNAMotif): Seq[DNAString] = {
+    val graph = deBruijnFromKmers(kMers)
+    maximalNonBranchingPaths(graph).map { l ⇒ stringSpelledByGenomePath(DNAMotif.unsafeFrom(l.toIndexedSeq)) }
   }
 }

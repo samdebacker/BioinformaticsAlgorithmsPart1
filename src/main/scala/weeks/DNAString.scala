@@ -48,6 +48,8 @@ object DNAString {
   import scala.language.experimental.macros
   import scala.language.implicitConversions
   implicit def apply(value: String): DNAString = macro DNAStringMacro.applyMacro
+
+  implicit val dnaStringOrdering = Ordering.by { (dnaString: DNAString) ⇒ dnaString.value }
 }
 
 final class DNAString private[weeks] (val value: String) extends AnyVal {
