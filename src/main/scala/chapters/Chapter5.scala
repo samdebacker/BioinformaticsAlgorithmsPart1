@@ -27,19 +27,37 @@ package chapters
 import scala.collection.immutable.ListMap
 
 object Chapter5 {
-  def dpChange(money: Int, coins: Set[Int]):Int = {
+  def dpChange(money: Int, coins: Set[Int]): Int = {
     val l = (0 to money).map { m ⇒
       (m → (if (m == 0) 0 else Int.MaxValue))
     }
     val minNumCoins = ListMap(l: _*)
-    val result = minNumCoins.tail.foldLeft(minNumCoins) { case (minNumCoins, (m, _)) ⇒
-      coins.foldLeft(minNumCoins) { (minNumCoins, c) ⇒
-        if (m >= c && (minNumCoins(m - c) + 1 < minNumCoins(m)))
-          minNumCoins.updated(m, minNumCoins(m - c) + 1)
-        else
-          minNumCoins
-      }
+    val result = minNumCoins.tail.foldLeft(minNumCoins) {
+      case (minNumCoins, (m, _)) ⇒
+        coins.foldLeft(minNumCoins) { (minNumCoins, c) ⇒
+          if (m >= c && (minNumCoins(m - c) + 1 < minNumCoins(m)))
+            minNumCoins.updated(m, minNumCoins(m - c) + 1)
+          else
+            minNumCoins
+        }
     }
     result(money)
+  }
+
+  def manhattanTourist(n: Int, m: Int)(down: IndexedSeq[IndexedSeq[Int]] /* n x (m + 1) */ , right: IndexedSeq[IndexedSeq[Int]] /* (n + 1) x m */ ): Int = {
+    val downTranspose: IndexedSeq[IndexedSeq[Int]] = down.transpose
+    var s = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ downTranspose(0).take(i).sum
+      case (0, j) ⇒ right(0).take(j).sum
+      case _      ⇒ 0
+    }
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        val m = math.max(s(i - 1)(j) + down(i - 1)(j), s(i)(j - 1) + right(i)(j - 1))
+        s = s.updated(i, s(i).updated(j, m))
+      }
+    }
+    s(n)(m)
   }
 }
