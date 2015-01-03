@@ -63,16 +63,14 @@ object Chapter5 {
   }
 
   def longestCommonSubsequence(v: DNAString, w: DNAString): DNAString = {
-    val vv = v.value
-    val ww = w.value
     def lcsBacktrack: IndexedSeq[IndexedSeq[Char]] = {
-      val n = vv.length
-      val m = ww.length
+      val n = v.value.length
+      val m = w.value.length
       var s = IndexedSeq.fill(n + 1, m + 1)(0)
       var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
       for (i ← 1 to n) {
         for (j ← 1 to m) {
-          val x = s(i - 1)(j - 1) + (if (vv.charAt(i - 1) == ww.charAt(j - 1)) 1 else 0)
+          val x = s(i - 1)(j - 1) + (if (v.value.charAt(i - 1) == w.value.charAt(j - 1)) 1 else 0)
           val m = math.max(math.max(s(i - 1)(j), s(i)(j - 1)), x)
           s = s.updated(i, s(i).updated(j, m))
           val b: Char =
@@ -89,9 +87,9 @@ object Chapter5 {
       else backtrack(i)(j) match {
         case '↓' ⇒ output(backtrack, i - 1, j, result)
         case '→' ⇒ output(backtrack, i, j - 1, result)
-        case _   ⇒ output(backtrack, i - 1, j - 1, result.append(vv.charAt(i - 1)))
+        case _   ⇒ output(backtrack, i - 1, j - 1, result.append(v.value.charAt(i - 1)))
       }
     }
-    output(lcsBacktrack, vv.length, ww.length, new StringBuilder)
+    output(lcsBacktrack, v.value.length, w.value.length, new StringBuilder)
   }
 }
