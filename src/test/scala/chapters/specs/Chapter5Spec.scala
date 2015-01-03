@@ -192,13 +192,13 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       val source = 0
       val sink = 4
       val graph = IndexedSeq(
-        0 → (1,7),
-        0 → (2,4),
-        2 → (3,2),
-        1 → (4,1),
-        3 → (4,3)
+        0 → (1, 7),
+        0 → (2, 4),
+        2 → (3, 2),
+        1 → (4, 1),
+        3 → (4, 3)
       )
-      longestPath(source, sink, graph) shouldBe (9, Seq(0,2,3,4))
+      longestPath(source, sink, graph) shouldBe (9, Seq(0, 2, 3, 4))
     }
 
     def loadGraphWithWeights(fn: String): IndexedSeq[(Int, (Int, Int))] = {
@@ -214,7 +214,7 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       val source = 0
       val sink = 44
       val graph = loadGraphWithWeights("src/main/resources/longestPathExtraDataset.txt")
-      longestPath(source, sink, graph) shouldBe (62, Seq(0,14,29,44))
+      longestPath(source, sink, graph) shouldBe (62, Seq(0, 14, 29, 44))
     }
 
     scenario("interactive quiz") {

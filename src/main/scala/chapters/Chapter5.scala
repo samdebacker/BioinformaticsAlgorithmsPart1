@@ -103,29 +103,29 @@ object Chapter5 {
       list = list :+ a
       candidates = candidates.tail
       g(a).foreach { b ⇒
-          g = g.updated(a, g(b).filterNot(_ == b))
-          inDegrees = inDegrees.updated(b, inDegrees(b) - 1)
-          if (inDegrees(b) == 0)
-            candidates = candidates + b
+        g = g.updated(a, g(b).filterNot(_ == b))
+        inDegrees = inDegrees.updated(b, inDegrees(b) - 1)
+        if (inDegrees(b) == 0)
+          candidates = candidates + b
       }
     }
     list
   }
 
-  def longestPath(source: Int, sink: Int, graph: IndexedSeq[(Int, (Int, Int))]): (Int , Seq[Int]) = {
+  def longestPath(source: Int, sink: Int, graph: IndexedSeq[(Int, (Int, Int))]): (Int, Seq[Int]) = {
     val nodes = graph.flatMap { case (k, v) ⇒ Seq(k, v._1) }.toSet
     val sRaw = nodes.toSeq.map(_ → (Int.MinValue, Seq.empty[Int]))
-    val g = graph.foldLeft(Map.empty[Int,Seq[Int]].withDefaultValue(Seq.empty[Int])) {
+    val g = graph.foldLeft(Map.empty[Int, Seq[Int]].withDefaultValue(Seq.empty[Int])) {
       case (g, (f, (t, _))) ⇒ g.updated(f, g(f) :+ t)
     }
     val initS: Map[Int, (Int, Seq[Int])] = Map(sRaw.toSeq: _*) + (source → (0, Seq(source)))
     val s = topologicalOrdering(nodes, g)
       .foldLeft(initS) { (s, b) ⇒
-        val pred = graph.filter { case (f, (t, _)) ⇒ t == b}
-        //val pred = g.filter { case (k: Int, v: Seq[Int]) ⇒ v.contains(b) }.keySet
+        val pred = graph.filter { case (_, (t, _)) ⇒ t == b }
         if (pred.nonEmpty) {
-          val max = pred.map { case (f, (t, w))  ⇒
-            (s(f)._1 + w, s(f)._2 :+ t)
+          val max = pred.map {
+            case (f, (t, w)) ⇒
+              (s(f)._1 + w, s(f)._2 :+ t)
           }.maxBy(_._1)
           s.updated(b, max)
         } else
