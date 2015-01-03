@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
 import scala.util.Random
 
-object Week4 {
+object Chapter4 {
   def compositionKmers(text: DNAString, k: Int): IndexedSeq[DNAString] = {
     @tailrec def kMers_(text: String, result: IndexedSeq[DNAString]): IndexedSeq[DNAString] = {
       if (text.length < k)

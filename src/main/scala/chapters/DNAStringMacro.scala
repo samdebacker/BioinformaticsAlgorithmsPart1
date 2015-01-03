@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 import scala.reflect.macros.whitebox.Context
 
@@ -45,7 +45,7 @@ object DNAStringMacro {
     }
     // If using UnsafeFrom this is a way to make it happen:
     // q"""
-    //     class UnsafeI extends weeks.DNAString.UnsafeFrom {
+    //     class UnsafeI extends chapters.DNAString.UnsafeFrom {
     //       def unsafeFromI(value: String): DNAString = unsafeFrom(value)
     //     }
     //     (new UnsafeI).unsafeFromI($value)

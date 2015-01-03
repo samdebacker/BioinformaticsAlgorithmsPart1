@@ -24,16 +24,16 @@
 
 package specs
 
+import chapters.Chapter4._
+import chapters.DNAString._
+import chapters.{DNAMotif, DNAString}
 import org.scalatest.FeatureSpec
 import org.scalatest.Matchers._
-import weeks.DNAString._
-import weeks.Week4._
-import weeks.{DNAMotif, DNAString}
 
 import scala.annotation.tailrec
 import scala.io.Source
 
-class Week4Spec extends FeatureSpec {
+class Chapter4Spec extends FeatureSpec {
   feature("compositionKmers") {
     scenario("example") {
       val text = DNAString("CAATCCAAC")
@@ -126,7 +126,7 @@ class Week4Spec extends FeatureSpec {
 
   feature("deBruijn") {
     scenario("example") {
-      val text  = DNAString("AAGATTCTCTAAGA")
+      val text = DNAString("AAGATTCTCTAAGA")
       val k = 4
       deBruijn(text, k) shouldBe Map(
         DNAString("AAG") → IndexedSeq(DNAString("AGA"), DNAString("AGA")),
@@ -159,7 +159,7 @@ class Week4Spec extends FeatureSpec {
 
   feature("deBruijnFromKmers") {
     scenario("example") {
-      val kMers  = DNAMotif("GAGG\nCAGG\nGGGG\nGGGA\nCAGG\nAGGG\nGGAG")
+      val kMers = DNAMotif("GAGG\nCAGG\nGGGG\nGGGA\nCAGG\nAGGG\nGGAG")
       deBruijnFromKmers(kMers) shouldBe Map(
         DNAString("AGG") → IndexedSeq(DNAString("GGG")),
         DNAString("CAG") → IndexedSeq(DNAString("AGG"), DNAString("AGG")),

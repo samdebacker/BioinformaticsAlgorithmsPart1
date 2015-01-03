@@ -22,12 +22,12 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-object Week1 extends App {
+object Chapter1 extends App {
   def patternCount(text: String, pattern: String): Int = {
     val patternLength = pattern.length
     @tailrec

@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 import scala.annotation.tailrec
 
-object Week2
+object Chapter2
     extends App {
   val geneticCode = Map(
     "AAA" -> "K",
@@ -159,7 +159,7 @@ object Week2
         else transcribeImpl(dnaPattern.tail, result + transcribe(dnaPattern.head))
       transcribeImpl(dnaPattern, "")
     }
-    (transcribe(dnaPattern), transcribe(Week1.reverseComplement(dnaPattern)))
+    (transcribe(dnaPattern), transcribe(Chapter1.reverseComplement(dnaPattern)))
   }
 
   def dnaEncodesPeptide(dnaPattern: String, peptide: String) = {
@@ -176,7 +176,7 @@ object Week2
       else {
         if (c % 10000 == 0) println(c)
         val dnaPart = dnaPattern.substring(0, peptideLength)
-        dnaEncodesPeptideImpl(dnaPattern.tail, if (peptide == fastPeptideFor(transcribe(dnaPart)) || peptide == fastPeptideFor(transcribe(Week1.reverseComplement(dnaPart)))) {
+        dnaEncodesPeptideImpl(dnaPattern.tail, if (peptide == fastPeptideFor(transcribe(dnaPart)) || peptide == fastPeptideFor(transcribe(Chapter1.reverseComplement(dnaPart)))) {
           println(dnaPart); result :+ dnaPart
         } else result, c + 1)
       }

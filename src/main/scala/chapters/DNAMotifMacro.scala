@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 import scala.reflect.macros.whitebox.Context
 

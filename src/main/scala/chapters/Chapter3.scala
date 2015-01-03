@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 import breeze.linalg._
 
@@ -30,7 +30,7 @@ import scala.annotation.tailrec
 import scala.math._
 import scala.util.Random
 
-object Week3 {
+object Chapter3 {
   /**
    * @param k the length of the k-mer
    * @param n the length of each DNA string
@@ -46,7 +46,7 @@ object Week3 {
       singleDnaString = singleDna.value
       i ← 0 until (singleDnaString.length - k)
       kMer = singleDnaString.substring(i, i + k)
-      neighbour ← Week1.neighbours(kMer, d) if dna.value.forall(ds ⇒ Week1.countApproxPattern(ds.value, neighbour, d) > 0)
+      neighbour ← Chapter1.neighbours(kMer, d) if dna.value.forall(ds ⇒ Chapter1.countApproxPattern(ds.value, neighbour, d) > 0)
     } yield DNAString.from(neighbour).get).toSet
   }
 
@@ -103,7 +103,7 @@ object Week3 {
   def score(motifs: IndexedSeq[DNA]): Int = {
     val c = consensus(motifs)
     motifs.foldLeft(0) { (d, text) ⇒
-      d + Week1.hammingDistance(c, text)
+      d + Chapter1.hammingDistance(c, text)
     }
   }
 
@@ -127,14 +127,14 @@ object Week3 {
       (for {
         i ← 0 to (d.length - k)
         kMer = d.substring(i, i + k)
-      } yield Week1.hammingDistance(pattern, kMer)).min
+      } yield Chapter1.hammingDistance(pattern, kMer)).min
     }.sum
   }
 
   def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int, all: Boolean = false): Set[String] = {
     val DPs = for {
       i ← 0 until pow(4, k).toInt
-      pattern = Week1.numberToPattern(i, k)
+      pattern = Chapter1.numberToPattern(i, k)
       d = distance(pattern, dna)
     } yield (d, pattern)
 

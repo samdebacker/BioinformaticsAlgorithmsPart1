@@ -1,12 +1,12 @@
 package specs
 
 import breeze.linalg.DenseMatrix
+import chapters.Chapter3._
+import chapters._
 import org.scalatest.Matchers._
 import org.scalatest._
-import weeks.Week3._
-import weeks._
 
-class Week3Spec extends FeatureSpec {
+class Chapter3Spec extends FeatureSpec {
   feature("expectedNumberOfOccurences") {
     scenario("interactive quiz") {
       expectedNumberOfOccurences(9, 1000, 500) shouldBe (1.8921 +- 0.0001)

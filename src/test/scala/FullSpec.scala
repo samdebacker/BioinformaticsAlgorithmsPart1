@@ -6,9 +6,9 @@ import scala.collection.immutable.IndexedSeq
 @DoNotDiscover
 class FullSpec extends Spec {
   override def nestedSuites = IndexedSeq(
-    new Week1Spec,
-    new Week2Spec,
-    new Week3Spec,
-    new Week4Spec
+    new Chapter1Spec,
+    new Chapter2Spec,
+    new Chapter3Spec,
+    new Chapter4Spec
   )
 }

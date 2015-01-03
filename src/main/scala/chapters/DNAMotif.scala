@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package weeks
+package chapters
 
 object DNAMotif {
   @inline def from(value: String): Option[DNAMotif] = isValid(value).map(new DNAMotif(_))
@@ -33,7 +33,7 @@ object DNAMotif {
    */
   @inline def unsafeFrom(value: IndexedSeq[DNAString]): DNAMotif = new DNAMotif(value)
 
-  private[weeks] def isValid(value: String): Option[IndexedSeq[DNAString]] = {
+  private[chapters] def isValid(value: String): Option[IndexedSeq[DNAString]] = {
     val dnaStrings: Array[String] = value.trim.split("""\W+""")
     if (dnaStrings.forall { s ⇒ s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
       Some(dnaStrings.map(s ⇒ new DNAString(s.toUpperCase)).toIndexedSeq)
@@ -47,7 +47,7 @@ object DNAMotif {
   implicit def apply(value: String): DNAMotif = macro DNAMotifMacro.applyMacro
 }
 
-final class DNAMotif private[weeks] (val value: IndexedSeq[DNAString]) extends AnyVal {
+final class DNAMotif private[chapters] (val value: IndexedSeq[DNAString]) extends AnyVal {
   override def toString: String = value.toString
   def k: Int = value.head.value.length
 }

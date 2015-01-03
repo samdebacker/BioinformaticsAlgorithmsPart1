@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package weeks
+package chapters
 
 import scala.util.matching.Regex
 
@@ -40,7 +40,7 @@ object DNAString {
   //}
 
   private[this] val dnaString: Regex = """(?i)[ACGT]+""".r
-  private[weeks] def isValid(value: String): Boolean = value.trim match {
+  private[chapters] def isValid(value: String): Boolean = value.trim match {
     case dnaString(_*) ⇒ true
     case _             ⇒ false
   }
@@ -52,6 +52,6 @@ object DNAString {
   implicit val dnaStringOrdering = Ordering.by { (dnaString: DNAString) ⇒ dnaString.value }
 }
 
-final class DNAString private[weeks] (val value: String) extends AnyVal {
+final class DNAString private[chapters] (val value: String) extends AnyVal {
   override def toString: String = value.toString
 }

@@ -23,9 +23,9 @@
  */
 
 import breeze.linalg.DenseMatrix
-import weeks.Week3._
+import chapters.Chapter3._
 
-package object weeks {
+package object chapters {
 
   implicit class DnaHelper(val sc: StringContext) extends AnyVal {
     @deprecated("use DNAString and DNAMotif", "0.1")
