@@ -29,7 +29,6 @@ import chapters.DNAString
 import org.scalatest.{ FeatureSpec, Matchers }
 
 import scala.io.Source
-import scala.util.matching.Regex
 
 class Chapter5Spec extends FeatureSpec with Matchers {
   feature("dpChange") {
@@ -184,7 +183,45 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       }
       val graph = loadGraphOfNodes("src/main/resources/topologicalOrderingInteractiveQuiz.txt")
       val nodes = graph.flatMap { case (k, v) ⇒ k +: v }.toSet
-      topologicalOrdering(nodes, graph).mkString(", ") shouldBe ""
+      topologicalOrdering(nodes, graph) shouldBe IndexedSeq(0, 5, 10, 14, 1, 6, 9, 13, 24, 2, 7, 3, 12, 17, 18, 11, 20, 27, 16, 19, 22, 4, 29, 8, 21, 15, 25, 28, 26, 23, 30, 31)
+    }
+  }
+
+  feature("longestPath") {
+    scenario("example") {
+      val source = 0
+      val sink = 4
+      val graph = IndexedSeq(
+        0 → (1,7),
+        0 → (2,4),
+        2 → (3,2),
+        1 → (4,1),
+        3 → (4,3)
+      )
+      longestPath(source, sink, graph) shouldBe (9, Seq(0,2,3,4))
+    }
+
+    def loadGraphWithWeights(fn: String): IndexedSeq[(Int, (Int, Int))] = {
+      val regex = """(?i)(\d+)->([\d]+):([\d]+)""".r
+      Source.fromFile(fn).getLines().map {
+        case regex(f, t, w) ⇒
+          f.toInt → (t.toInt, w.toInt)
+      }.toIndexedSeq
+
+    }
+
+    scenario("extra dataset") {
+      val source = 0
+      val sink = 44
+      val graph = loadGraphWithWeights("src/main/resources/longestPathExtraDataset.txt")
+      longestPath(source, sink, graph) shouldBe (62, Seq(0,14,29,44))
+    }
+
+    scenario("interactive quiz") {
+      val source = 2
+      val sink = 42
+      val graph = loadGraphWithWeights("src/main/resources/longestPathInteractiveQuiz.txt")
+      longestPath(source, sink, graph) shouldBe (67, List(2, 13, 19, 36, 42))
     }
   }
 }

@@ -112,26 +112,25 @@ object Chapter5 {
     list
   }
 
-  /*
-  def longestPath(source: Int, sink: Int, graph: IndexedSeq[(Int, (Int, Int))]): /*(*/Int /*, Seq[Int])*/ = {
+  def longestPath(source: Int, sink: Int, graph: IndexedSeq[(Int, (Int, Int))]): (Int , Seq[Int]) = {
     val nodes = graph.flatMap { case (k, v) ⇒ Seq(k, v._1) }.toSet
-    val sRaw = nodes.map(_ → Int.MaxValue)
-    val s = Map(sRaw.toSeq: _*) + (source → 0)
-    val newS = topologicalOrdering(nodes, graph.map { case (k, v) ⇒ (k, v._1) })
-      .foldLeft(s) { (s, b) ⇒
-        val m = graph
-          .filter(_._2._1 == b)
-          .map {
-            case (node, _) ⇒
-              s(node) + graph.filter {
-                case (n, _) ⇒
-                  n == node
-              }.head._2._1
-          }
-          .max
-        s.updated(b, m)
+    val sRaw = nodes.toSeq.map(_ → (Int.MinValue, Seq.empty[Int]))
+    val g = graph.foldLeft(Map.empty[Int,Seq[Int]].withDefaultValue(Seq.empty[Int])) {
+      case (g, (f, (t, _))) ⇒ g.updated(f, g(f) :+ t)
+    }
+    val initS: Map[Int, (Int, Seq[Int])] = Map(sRaw.toSeq: _*) + (source → (0, Seq(source)))
+    val s = topologicalOrdering(nodes, g)
+      .foldLeft(initS) { (s, b) ⇒
+        val pred = graph.filter { case (f, (t, _)) ⇒ t == b}
+        //val pred = g.filter { case (k: Int, v: Seq[Int]) ⇒ v.contains(b) }.keySet
+        if (pred.nonEmpty) {
+          val max = pred.map { case (f, (t, w))  ⇒
+            (s(f)._1 + w, s(f)._2 :+ t)
+          }.maxBy(_._1)
+          s.updated(b, max)
+        } else
+          s
       }
-    newS(sink)
+    s(sink)
   }
-  */
 }
