@@ -92,4 +92,46 @@ object Chapter5 {
     }
     output(lcsBacktrack, v.value.length, w.value.length, new StringBuilder)
   }
+
+  def topologicalOrdering(nodes: Set[Int], graph: Map[Int, Seq[Int]]): IndexedSeq[Int] = {
+    var inDegrees: Map[Int, Int] = Chapter4.inDegreesOf(graph, Map(nodes.toSeq.map { node ⇒ (node, 0) }: _*))
+    var candidates = inDegrees.filter(_._2 == 0).keySet
+    var list = IndexedSeq.empty[Int]
+    var g = graph
+    while (candidates.nonEmpty) {
+      val a = candidates.head
+      list = list :+ a
+      candidates = candidates.tail
+      g(a).foreach { b ⇒
+          g = g.updated(a, g(b).filterNot(_ == b))
+          inDegrees = inDegrees.updated(b, inDegrees(b) - 1)
+          if (inDegrees(b) == 0)
+            candidates = candidates + b
+      }
+    }
+    list
+  }
+
+  /*
+  def longestPath(source: Int, sink: Int, graph: IndexedSeq[(Int, (Int, Int))]): /*(*/Int /*, Seq[Int])*/ = {
+    val nodes = graph.flatMap { case (k, v) ⇒ Seq(k, v._1) }.toSet
+    val sRaw = nodes.map(_ → Int.MaxValue)
+    val s = Map(sRaw.toSeq: _*) + (source → 0)
+    val newS = topologicalOrdering(nodes, graph.map { case (k, v) ⇒ (k, v._1) })
+      .foldLeft(s) { (s, b) ⇒
+        val m = graph
+          .filter(_._2._1 == b)
+          .map {
+            case (node, _) ⇒
+              s(node) + graph.filter {
+                case (n, _) ⇒
+                  n == node
+              }.head._2._1
+          }
+          .max
+        s.updated(b, m)
+      }
+    newS(sink)
+  }
+  */
 }

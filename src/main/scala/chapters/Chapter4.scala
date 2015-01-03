@@ -105,17 +105,17 @@ object Chapter4 {
     eulerianCycle_(cycle, restGraph)
   }
 
+  @tailrec private[this] def increase[T](nodes: Seq[T], indegrees: Map[T, Int]): Map[T, Int] = {
+    if (nodes.isEmpty) indegrees
+    else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
+  }
+  @tailrec private[chapters] def inDegreesOf[T](graph: Map[T, Seq[T]], inDegrees: Map[T, Int]): Map[T, Int] = {
+    if (graph.isEmpty) inDegrees
+    else {
+      inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))
+    }
+  }
   def eulerianPath[T](graph: Map[T, Seq[T]]): IndexedSeq[T] = {
-    @tailrec def increase(nodes: Seq[T], indegrees: Map[T, Int]): Map[T, Int] = {
-      if (nodes.isEmpty) indegrees
-      else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
-    }
-    @tailrec def inDegreesOf(graph: Map[T, Seq[T]], inDegrees: Map[T, Int]): Map[T, Int] = {
-      if (graph.isEmpty) inDegrees
-      else {
-        inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))
-      }
-    }
     val nodes = ((for {
       edges ← graph
       node ← edges._2
