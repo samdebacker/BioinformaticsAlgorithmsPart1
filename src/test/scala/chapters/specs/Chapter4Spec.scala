@@ -27,13 +27,12 @@ package specs
 import chapters.Chapter4._
 import chapters.DNAString._
 import chapters.{DNAMotif, DNAString}
-import org.scalatest.FeatureSpec
-import org.scalatest.Matchers._
+import org.scalatest.{FeatureSpec, Matchers}
 
 import scala.annotation.tailrec
 import scala.io.Source
 
-class Chapter4Spec extends FeatureSpec {
+class Chapter4Spec extends FeatureSpec with Matchers {
   feature("compositionKmers") {
     scenario("example") {
       val text = DNAString("CAATCCAAC")

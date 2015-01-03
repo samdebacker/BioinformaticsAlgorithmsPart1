@@ -1,5 +1,6 @@
+package specs
+
 import org.scalatest._
-import specs._
 
 import scala.collection.immutable.IndexedSeq
 

@@ -26,7 +26,7 @@ import org.scalatest.Tag
 
 package object specs {
   // Run with
-  //  testOnly FullSpec -- -l SlowTest
+  //  testOnly specs.FullSpec -- -l SlowTest
   // to exclude tests that are marked as slow
   object SlowTest extends Tag("SlowTest")
 }
