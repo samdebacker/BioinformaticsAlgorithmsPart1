@@ -24,6 +24,7 @@
 
 package chapters
 
+import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
 
 object Chapter5 {
@@ -59,5 +60,38 @@ object Chapter5 {
       }
     }
     s(n)(m)
+  }
+
+  def longestCommonSubsequence(v: DNAString, w: DNAString): DNAString = {
+    val vv = v.value
+    val ww = w.value
+    def lcsBacktrack: IndexedSeq[IndexedSeq[Char]] = {
+      val n = vv.length
+      val m = ww.length
+      var s = IndexedSeq.fill(n + 1, m + 1)(0)
+      var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+      for (i ← 1 to n) {
+        for (j ← 1 to m) {
+          val x = s(i - 1)(j - 1) + (if (vv.charAt(i - 1) == ww.charAt(j - 1)) 1 else 0)
+          val m = math.max(math.max(s(i - 1)(j), s(i)(j - 1)), x)
+          s = s.updated(i, s(i).updated(j, m))
+          val b: Char =
+            if (s(i)(j) == s(i - 1)(j)) '↓'
+            else if (s(i)(j) == s(i)(j - 1)) '→'
+            else '↘'
+          backtrack = backtrack.updated(i, backtrack(i).updated(j, b))
+        }
+      }
+      backtrack
+    }
+    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, result: StringBuilder): DNAString = {
+      if (i == 0 || j == 0) DNAString.unsafeFrom(result.toString.reverse)
+      else backtrack(i)(j) match {
+        case '↓' ⇒ output(backtrack, i - 1, j, result)
+        case '→' ⇒ output(backtrack, i, j - 1, result)
+        case _   ⇒ output(backtrack, i - 1, j - 1, result.append(vv.charAt(i - 1)))
+      }
+    }
+    output(lcsBacktrack, vv.length, ww.length, new StringBuilder)
   }
 }
