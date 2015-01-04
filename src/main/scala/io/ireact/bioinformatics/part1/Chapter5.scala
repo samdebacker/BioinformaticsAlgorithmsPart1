@@ -22,7 +22,9 @@
  * THE SOFTWARE.
  */
 
-package chapters
+package io.ireact.bioinformatics.part1
+
+import io.ireact.bioinformatics.part1.support.DNAString
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap

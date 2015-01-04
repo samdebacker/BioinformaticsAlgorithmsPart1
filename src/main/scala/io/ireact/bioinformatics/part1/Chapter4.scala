@@ -22,7 +22,9 @@
  * THE SOFTWARE.
  */
 
-package chapters
+package io.ireact.bioinformatics.part1
+
+import support.{ DNAMotif, DNAString }
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
@@ -109,7 +111,7 @@ object Chapter4 {
     if (nodes.isEmpty) indegrees
     else increase(nodes.tail, indegrees.updated(nodes.head, indegrees(nodes.head) + 1))
   }
-  @tailrec private[chapters] def inDegreesOf[T](graph: Map[T, Seq[T]], inDegrees: Map[T, Int]): Map[T, Int] = {
+  @tailrec private[part1] def inDegreesOf[T](graph: Map[T, Seq[T]], inDegrees: Map[T, Int]): Map[T, Int] = {
     if (graph.isEmpty) inDegrees
     else {
       inDegreesOf(graph.tail, increase(graph.head._2, inDegrees))

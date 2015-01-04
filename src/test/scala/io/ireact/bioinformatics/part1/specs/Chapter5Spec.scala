@@ -22,10 +22,10 @@
  * THE SOFTWARE.
  */
 
-package specs
+package io.ireact.bioinformatics.part1.specs
 
-import chapters.Chapter5._
-import chapters.DNAString
+import io.ireact.bioinformatics.part1.Chapter5._
+import io.ireact.bioinformatics.part1.support.DNAString
 import org.scalatest.{ FeatureSpec, Matchers }
 
 import scala.io.Source

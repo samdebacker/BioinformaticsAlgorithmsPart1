@@ -22,22 +22,10 @@
  * THE SOFTWARE.
  */
 
-import breeze.linalg.DenseMatrix
-import chapters.Chapter3._
+package io.ireact.bioinformatics.part1.specs
 
-package object chapters {
+import org.scalatest.{ FeatureSpec, Matchers }
 
-  implicit class DnaHelper(val sc: StringContext) extends AnyVal {
-    @deprecated("use DNAString and DNAMotif", "0.1")
-    def dna(args: Any*): IndexedSeq[DNA] = {
-      sc.parts.mkString.trim.toUpperCase.split("\\W+").toIndexedSeq
-    }
-  }
+class Chapter2Spec extends FeatureSpec with Matchers {
 
-  implicit class ProfileHelper(val sc: StringContext) extends AnyVal {
-    def profile(args: Any*): Profile = {
-      val m = sc.parts.mkString.trim.split("[^\\d\\.]+").map(_.toDouble)
-      new DenseMatrix(m.length / 4, 4, m).t
-    }
-  }
 }

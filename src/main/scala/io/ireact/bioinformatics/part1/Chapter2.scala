@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package chapters
+package io.ireact.bioinformatics.part1
 
 import scala.annotation.tailrec
 

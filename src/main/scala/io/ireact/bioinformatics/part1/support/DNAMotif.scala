@@ -22,25 +22,32 @@
  * THE SOFTWARE.
  */
 
-package chapters
+package io.ireact.bioinformatics.part1.support
 
-import scala.reflect.macros.whitebox.Context
+object DNAMotif {
+  @inline def from(value: String): Option[DNAMotif] = isValid(value).map(new DNAMotif(_))
 
-object DNAMotifMacro {
-  def applyMacro(c: Context)(value: c.Expr[String]): c.Tree = {
-    import c.universe._
-    value.tree match {
-      case Literal(stringConst) ⇒
-        val literalValue = stringConst.value.toString
-        DNAMotif.isValid(literalValue) match {
-          case Some(dnaStrings) ⇒
-            val args = dnaStrings.map(dnaString ⇒ q"DNAString(${dnaString.toString})")
-            q"DNAMotif.unsafeFrom(IndexedSeq(..$args))"
-          case _ ⇒
-            c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length, and can only contain nucleotides A, C, G or T")
-        }
-      case _ ⇒
-        c.abort(c.enclosingPosition, "DNAMotif macro only works on String Literals, use DNAMotif.form(String) instead.")
+  /**
+   * /!\ For macro use, do not call this method directly /!\
+   * This way of construction is unsafe since it allows DNAStrings of different length, the macro checks this.
+   */
+  @inline def unsafeFrom(value: IndexedSeq[DNAString]): DNAMotif = new DNAMotif(value)
+
+  private[support] def isValid(value: String): Option[IndexedSeq[DNAString]] = {
+    val dnaStrings: Array[String] = value.trim.split("""\W+""")
+    if (dnaStrings.forall { s ⇒ s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
+      Some(dnaStrings.map(s ⇒ new DNAString(s.toUpperCase)).toIndexedSeq)
+    } else {
+      None
     }
   }
+
+  import scala.language.experimental.macros
+  import scala.language.implicitConversions
+  implicit def apply(value: String): DNAMotif = macro DNAMotifMacro.applyMacro
+}
+
+final class DNAMotif private[support] (val value: IndexedSeq[DNAString]) extends AnyVal {
+  override def toString: String = value.toString
+  def k: Int = value.head.value.length
 }

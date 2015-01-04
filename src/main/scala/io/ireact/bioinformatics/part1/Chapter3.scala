@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package chapters
+package io.ireact.bioinformatics.part1
 
+import support.{ DNAString, DNAMotif }
 import breeze.linalg._
 
 import scala.annotation.tailrec

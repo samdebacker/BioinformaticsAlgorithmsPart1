@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 www.iReact.io
+ * Copyright (c) 2015 www.iReact.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,25 @@
  * THE SOFTWARE.
  */
 
-import org.scalatest.Tag
+package io.ireact.bioinformatics.part1.support
 
-package object specs {
-  // Run with
-  //  testOnly specs.FullSpec -- -l SlowTest
-  // to exclude tests that are marked as slow
-  object SlowTest extends Tag("SlowTest")
+import scala.reflect.macros.whitebox.Context
+
+object DNAMotifMacro {
+  def applyMacro(c: Context)(value: c.Expr[String]): c.Tree = {
+    import c.universe._
+    value.tree match {
+      case Literal(stringConst) ⇒
+        val literalValue = stringConst.value.toString
+        DNAMotif.isValid(literalValue) match {
+          case Some(dnaStrings) ⇒
+            val args = dnaStrings.map(dnaString ⇒ q"DNAString(${dnaString.toString})")
+            q"DNAMotif.unsafeFrom(IndexedSeq(..$args))"
+          case _ ⇒
+            c.abort(c.enclosingPosition, "DNAMotif must be formed of DNAStrings all of the same length, and can only contain nucleotides A, C, G or T")
+        }
+      case _ ⇒
+        c.abort(c.enclosingPosition, "DNAMotif macro only works on String Literals, use DNAMotif.form(String) instead.")
+    }
+  }
 }

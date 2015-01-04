@@ -22,32 +22,13 @@
  * THE SOFTWARE.
  */
 
-package chapters
+package io.ireact.bioinformatics
 
-object DNAMotif {
-  @inline def from(value: String): Option[DNAMotif] = isValid(value).map(new DNAMotif(_))
+import org.scalatest.Tag
 
-  /**
-   * /!\ For macro use, do not call this method directly /!\
-   * This way of construction is unsafe since it allows DNAStrings of different length, the macro checks this.
-   */
-  @inline def unsafeFrom(value: IndexedSeq[DNAString]): DNAMotif = new DNAMotif(value)
-
-  private[chapters] def isValid(value: String): Option[IndexedSeq[DNAString]] = {
-    val dnaStrings: Array[String] = value.trim.split("""\W+""")
-    if (dnaStrings.forall { s ⇒ s.length == dnaStrings.head.length && DNAString.isValid(s) }) {
-      Some(dnaStrings.map(s ⇒ new DNAString(s.toUpperCase)).toIndexedSeq)
-    } else {
-      None
-    }
-  }
-
-  import scala.language.experimental.macros
-  import scala.language.implicitConversions
-  implicit def apply(value: String): DNAMotif = macro DNAMotifMacro.applyMacro
-}
-
-final class DNAMotif private[chapters] (val value: IndexedSeq[DNAString]) extends AnyVal {
-  override def toString: String = value.toString
-  def k: Int = value.head.value.length
+package object specs {
+  // Run with
+  //  testOnly FullSpec -- -l SlowTest
+  // to exclude tests that are marked as slow
+  object SlowTest extends Tag("io.ireact.bioinformatics.specs.SlowTest")
 }
