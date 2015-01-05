@@ -95,10 +95,10 @@ object Chapter5 {
     output(lcsBacktrack, v.value.length, w.value.length, new StringBuilder)
   }
 
-  def topologicalOrdering(nodes: Set[Int], graph: Map[Int, Seq[Int]]): IndexedSeq[Int] = {
-    var inDegrees: Map[Int, Int] = Chapter4.inDegreesOf(graph, Map(nodes.toSeq.map { node ⇒ (node, 0) }: _*))
+  def topologicalOrdering[T](nodes: Set[T], graph: Map[T, Seq[T]]): IndexedSeq[T] = {
+    var inDegrees: Map[T, Int] = Chapter4.inDegreesOf(graph, Map(nodes.toSeq.map { node ⇒ (node, 0) }: _*))
     var candidates = inDegrees.filter(_._2 == 0).keySet
-    var list = IndexedSeq.empty[Int]
+    var list = IndexedSeq.empty[T]
     var g = graph
     while (candidates.nonEmpty) {
       val a = candidates.head
@@ -114,13 +114,13 @@ object Chapter5 {
     list
   }
 
-  def longestPath(source: Int, sink: Int, graph: IndexedSeq[(Int, (Int, Int))]): (Int, Seq[Int]) = {
+  def longestPath[T](source: T, sink: T, graph: IndexedSeq[(T, (T, Int))]): (Int, Seq[T]) = {
     val nodes = graph.flatMap { case (k, v) ⇒ Seq(k, v._1) }.toSet
-    val sRaw = nodes.toSeq.map(_ → (Int.MinValue, Seq.empty[Int]))
-    val g = graph.foldLeft(Map.empty[Int, Seq[Int]].withDefaultValue(Seq.empty[Int])) {
+    val sRaw = nodes.toSeq.map(_ → (Int.MinValue, Seq.empty[T]))
+    val g = graph.foldLeft(Map.empty[T, Seq[T]].withDefaultValue(Seq.empty[T])) {
       case (g, (f, (t, _))) ⇒ g.updated(f, g(f) :+ t)
     }
-    val initS: Map[Int, (Int, Seq[Int])] = Map(sRaw.toSeq: _*) + (source → (0, Seq(source)))
+    val initS: Map[T, (Int, Seq[T])] = Map(sRaw.toSeq: _*) + (source → (0, Seq(source)))
     val s = topologicalOrdering(nodes, g)
       .foldLeft(initS) { (s, b) ⇒
         val pred = graph.filter { case (_, (t, _)) ⇒ t == b }
@@ -194,15 +194,87 @@ object Chapter5 {
       for (j ← 1 to m) {
         val sc = scoring(v(i - 1))(w(j - 1))
         val possibilities = Seq(
-          (s(i - 1)(j) - sigma, -sigma, '↓'),
-          (s(i)(j - 1) - sigma, -sigma, '→'),
-          (s(i - 1)(j - 1) + sc, sc, '↘')
+          (s(i - 1)(j) - sigma, '↓'),
+          (s(i)(j - 1) - sigma, '→'),
+          (s(i - 1)(j - 1) + sc, '↘')
         )
         val max = possibilities.maxBy(_._1)
         s = s.updated(i, s(i).updated(j, max._1))
-        backtrack = backtrack.updated(i, backtrack(i).updated(j, max._3))
+        backtrack = backtrack.updated(i, backtrack(i).updated(j, max._2))
       }
     }
     (s(n)(m), output(backtrack, v.length, w.length, new StringBuilder, new StringBuilder))
+  }
+
+  import spray.json._
+  private[this] val pam250: Map[Char, Map[Char, Int]] = """
+      {
+        "A": { "A": 2, "C": -2, "E": 0, "D": 0, "G": 1, "F": -3, "I": -1, "H": -1, "K": -1, "M": -1, "L": -2, "N": 0, "Q": 0, "P": 1, "S": 1, "R": -2, "T": 1, "W": -6, "V": 0, "Y": -3},
+        "C": {"A": -2, "C": 12, "E": -5, "D": -5, "G": -3, "F": -4, "I": -2, "H": -3, "K": -5, "M": -5, "L": -6, "N": -4, "Q": -5, "P": -3, "S": 0, "R": -4, "T": -2, "W": -8, "V": -2, "Y": 0},
+        "E": {"A": 0, "C": -5, "E": 4, "D": 3, "G": 0, "F": -5, "I": -2, "H": 1, "K": 0, "M": -2, "L": -3, "N": 1, "Q": 2, "P": -1, "S": 0, "R": -1, "T": 0, "W": -7, "V": -2, "Y": -4},
+        "D": {"A": 0, "C": -5, "E": 3, "D": 4, "G": 1, "F": -6, "I": -2, "H": 1, "K": 0, "M": -3, "L": -4, "N": 2, "Q": 2, "P": -1, "S": 0, "R": -1, "T": 0, "W": -7, "V": -2, "Y": -4},
+        "G": {"A": 1, "C": -3, "E": 0, "D": 1, "G": 5, "F": -5, "I": -3, "H": -2, "K": -2, "M": -3, "L": -4, "N": 0, "Q": -1, "P": 0, "S": 1, "R": -3, "T": 0, "W": -7, "V": -1, "Y": -5},
+        "F": {"A": -3, "C": -4, "E": -5, "D": -6, "G": -5, "F": 9, "I": 1, "H": -2, "K": -5, "M": 0, "L": 2, "N": -3, "Q": -5, "P": -5, "S": -3, "R": -4, "T": -3, "W": 0, "V": -1, "Y": 7},
+        "I": {"A": -1, "C": -2, "E": -2, "D": -2, "G": -3, "F": 1, "I": 5, "H": -2, "K": -2, "M": 2, "L": 2, "N": -2, "Q": -2, "P": -2, "S": -1, "R": -2, "T": 0, "W": -5, "V": 4, "Y": -1},
+        "H": {"A": -1, "C": -3, "E": 1, "D": 1, "G": -2, "F": -2, "I": -2, "H": 6, "K": 0, "M": -2, "L": -2, "N": 2, "Q": 3, "P": 0, "S": -1, "R": 2, "T": -1, "W": -3, "V": -2, "Y": 0},
+        "K": {"A": -1, "C": -5, "E": 0, "D": 0, "G": -2, "F": -5, "I": -2, "H": 0, "K": 5, "M": 0, "L": -3, "N": 1, "Q": 1, "P": -1, "S": 0, "R": 3, "T": 0, "W": -3, "V": -2, "Y": -4},
+        "M": {"A": -1, "C": -5, "E": -2, "D": -3, "G": -3, "F": 0, "I": 2, "H": -2, "K": 0, "M": 6, "L": 4, "N": -2, "Q": -1, "P": -2, "S": -2, "R": 0, "T": -1, "W": -4, "V": 2, "Y": -2},
+        "L": {"A": -2, "C": -6, "E": -3, "D": -4, "G": -4, "F": 2, "I": 2, "H": -2, "K": -3, "M": 4, "L": 6, "N": -3, "Q": -2, "P": -3, "S": -3, "R": -3, "T": -2, "W": -2, "V": 2, "Y": -1},
+        "N": {"A": 0, "C": -4, "E": 1, "D": 2, "G": 0, "F": -3, "I": -2, "H": 2, "K": 1, "M": -2, "L": -3, "N": 2, "Q": 1, "P": 0, "S": 1, "R": 0, "T": 0, "W": -4, "V": -2, "Y": -2},
+        "Q": {"A": 0, "C": -5, "E": 2, "D": 2, "G": -1, "F": -5, "I": -2, "H": 3, "K": 1, "M": -1, "L": -2, "N": 1, "Q": 4, "P": 0, "S": -1, "R": 1, "T": -1, "W": -5, "V": -2, "Y": -4},
+        "P": {"A": 1, "C": -3, "E": -1, "D": -1, "G": 0, "F": -5, "I": -2, "H": 0, "K": -1, "M": -2, "L": -3, "N": 0, "Q": 0, "P": 6, "S": 1, "R": 0, "T": 0, "W": -6, "V": -1, "Y": -5},
+        "S": {"A": 1, "C": 0, "E": 0, "D": 0, "G": 1, "F": -3, "I": -1, "H": -1, "K": 0, "M": -2, "L": -3, "N": 1, "Q": -1, "P": 1, "S": 2, "R": 0, "T": 1, "W": -2, "V": -1, "Y": -3},
+        "R": {"A": -2, "C": -4, "E": -1, "D": -1, "G": -3, "F": -4, "I": -2, "H": 2, "K": 3, "M": 0, "L": -3, "N": 0, "Q": 1, "P": 0, "S": 0, "R": 6, "T": -1, "W": 2, "V": -2, "Y": -4},
+        "T": {"A": 1, "C": -2, "E": 0, "D": 0, "G": 0, "F": -3, "I": 0, "H": -1, "K": 0, "M": -1, "L": -2, "N": 0, "Q": -1, "P": 0, "S": 1, "R": -1, "T": 3, "W": -5, "V": 0, "Y": -3},
+        "W": {"A": -6, "C": -8, "E": -7, "D": -7, "G": -7, "F": 0, "I": -5, "H": -3, "K": -3, "M": -4, "L": -2, "N": -4, "Q": -5, "P": -6, "S": -2, "R": 2, "T": -5, "W": 17, "V": -6, "Y": 0},
+        "V": {"A": 0, "C": -2, "E": -2, "D": -2, "G": -1, "F": -1, "I": 4, "H": -2, "K": -2, "M": 2, "L": 2, "N": -2, "Q": -2, "P": -1, "S": -1, "R": -2, "T": 0, "W": -6, "V": 4, "Y": -2},
+        "Y": {"A": -3, "C": 0, "E": -4, "D": -4, "G": -5, "F": 7, "I": -1, "H": 0, "K": -4, "M": -2, "L": -1, "N": -2, "Q": -4, "P": -5, "S": -3, "R": -4, "T": -3, "W": 0, "V": -2, "Y": 10}
+      }
+    """.parseJson.asJsObject.fields.map {
+    case (k, v) ⇒
+      k(0) -> v.asJsObject.fields.map {
+        case (k, v) ⇒
+          k(0) -> v.toString().toInt
+
+      }
+  }
+
+  def localAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = pam250, sigma: Int = 5): (Int, (String, String)) = {
+    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+      backtrack(i)(j) match {
+        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
+        case '↘' ⇒ output(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+        case 'B' ⇒ (rv.toString.reverse, rw.toString.reverse)
+      }
+    }
+    val n = v.length
+    val m = w.length
+    var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ i * -sigma
+      case (0, j) ⇒ j * -sigma
+      case _      ⇒ 0
+    }
+    var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        val sc = scoring(v(i - 1))(w(j - 1))
+
+        val possibilities = Seq(
+          (0, 'B'),
+          (s(i - 1)(j) - sigma, '↓'),
+          (s(i)(j - 1) - sigma, '→'),
+          (s(i - 1)(j - 1) + sc, '↘')
+        )
+        val max = possibilities.maxBy(_._1)
+        s = s.updated(i, s(i).updated(j, max._1))
+        backtrack = backtrack.updated(i, backtrack(i).updated(j, max._2))
+      }
+    }
+    val allMax = s.map(_.max).max
+    val index = s.flatten.indexOf(allMax)
+    val (r, c) = (index / (m + 1), index % (m + 1))
+    (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
   }
 }
