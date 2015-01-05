@@ -72,7 +72,7 @@ object Chapter5 {
       var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
       for (i ← 1 to n) {
         for (j ← 1 to m) {
-          val x = s(i - 1)(j - 1) + (if (v.value.charAt(i - 1) == w.value.charAt(j - 1)) 1 else 0)
+          val x = s(i - 1)(j - 1) + (if (v.value(i - 1) == w.value(j - 1)) 1 else 0)
           val m = math.max(math.max(s(i - 1)(j), s(i)(j - 1)), x)
           s = s.updated(i, s(i).updated(j, m))
           val b: Char =
@@ -89,7 +89,7 @@ object Chapter5 {
       else backtrack(i)(j) match {
         case '↓' ⇒ output(backtrack, i - 1, j, result)
         case '→' ⇒ output(backtrack, i, j - 1, result)
-        case _   ⇒ output(backtrack, i - 1, j - 1, result.append(v.value.charAt(i - 1)))
+        case _   ⇒ output(backtrack, i - 1, j - 1, result.append(v.value(i - 1)))
       }
     }
     output(lcsBacktrack, v.value.length, w.value.length, new StringBuilder)
@@ -134,5 +134,75 @@ object Chapter5 {
           s
       }
     s(sink)
+  }
+
+  private[this] lazy val blossum62 = Map(
+    'A' → Map('A' → 4, 'C' → 0, 'D' → -2, 'E' → -1, 'F' -> -2, 'G' → 0, 'H' → -2, 'I' -> -1, 'K' → -1, 'L' → -1, 'M' → -1, 'N' → -2, 'P' → -1, 'Q' → -1, 'R' → -1, 'S' → 1, 'T' → 0, 'V' → 0, 'W' → -3, 'Y' → -2),
+    'C' → Map('A' → 0, 'C' → 9, 'D' → -3, 'E' → -4, 'F' -> -2, 'G' → -3, 'H' → -3, 'I' -> -1, 'K' → -3, 'L' → -1, 'M' → -1, 'N' → -3, 'P' → -3, 'Q' → -3, 'R' → -3, 'S' → -1, 'T' → -1, 'V' → -1, 'W' → -2, 'Y' → -2),
+    'D' → Map('A' → -2, 'C' → -3, 'D' → 6, 'E' → 2, 'F' -> -3, 'G' → -1, 'H' → -1, 'I' -> -3, 'K' → -1, 'L' → -4, 'M' → -3, 'N' → 1, 'P' → -1, 'Q' → 0, 'R' → -2, 'S' → 0, 'T' → -1, 'V' → -3, 'W' → -4, 'Y' → -3),
+    'E' → Map('A' → -1, 'C' → -4, 'D' → 2, 'E' → 5, 'F' -> -3, 'G' → -2, 'H' → 0, 'I' -> -3, 'K' → 1, 'L' → -3, 'M' → -2, 'N' → 0, 'P' → -1, 'Q' → 2, 'R' → 0, 'S' → 0, 'T' → -1, 'V' → -2, 'W' → -3, 'Y' → -2),
+    'F' → Map('A' → -2, 'C' → -2, 'D' → -3, 'E' → -3, 'F' -> 6, 'G' → -3, 'H' → -1, 'I' -> 0, 'K' → -3, 'L' → 0, 'M' → 0, 'N' → -3, 'P' → -4, 'Q' → -3, 'R' → -3, 'S' → -2, 'T' → -2, 'V' → -1, 'W' → 1, 'Y' → 3),
+    'G' → Map('A' → 0, 'C' → -3, 'D' → -1, 'E' → -2, 'F' -> -3, 'G' → 6, 'H' → -2, 'I' -> -4, 'K' → -2, 'L' → -4, 'M' → -3, 'N' → 0, 'P' → -2, 'Q' → -2, 'R' → -2, 'S' → 0, 'T' → -2, 'V' → -3, 'W' → -2, 'Y' → -3),
+    'H' → Map('A' → -2, 'C' → -3, 'D' → -1, 'E' → 0, 'F' -> -1, 'G' → -2, 'H' → 8, 'I' -> -3, 'K' → -1, 'L' → -3, 'M' → -2, 'N' → 1, 'P' → -2, 'Q' → 0, 'R' → 0, 'S' → -1, 'T' → -2, 'V' → -3, 'W' → -2, 'Y' → 2),
+    'I' → Map('A' → -1, 'C' → -1, 'D' → -3, 'E' → -3, 'F' -> 0, 'G' → -4, 'H' → -3, 'I' -> 4, 'K' → -3, 'L' → 2, 'M' → 1, 'N' → -3, 'P' → -3, 'Q' → -3, 'R' → -3, 'S' → -2, 'T' → -1, 'V' → 3, 'W' → -3, 'Y' → -1),
+    'K' → Map('A' → -1, 'C' → -3, 'D' → -1, 'E' → 1, 'F' -> -3, 'G' → -2, 'H' → -1, 'I' -> -3, 'K' → 5, 'L' → -2, 'M' → -1, 'N' → 0, 'P' → -1, 'Q' → 1, 'R' → 2, 'S' → 0, 'T' → -1, 'V' → -2, 'W' → -3, 'Y' → -2),
+    'L' → Map('A' → -1, 'C' → -1, 'D' → -4, 'E' → -3, 'F' -> 0, 'G' → -4, 'H' → -3, 'I' -> 2, 'K' → -2, 'L' → 4, 'M' → 2, 'N' → -3, 'P' → -3, 'Q' → -2, 'R' → -2, 'S' → -2, 'T' → -1, 'V' → 1, 'W' → -2, 'Y' → -1),
+    'M' → Map('A' → -1, 'C' → -1, 'D' → -3, 'E' → -2, 'F' -> 0, 'G' → -3, 'H' → -2, 'I' -> 1, 'K' → -1, 'L' → 2, 'M' → 5, 'N' → -2, 'P' → -2, 'Q' → 0, 'R' → -1, 'S' → -1, 'T' → -1, 'V' → 1, 'W' → -1, 'Y' → -1),
+    'N' → Map('A' → -2, 'C' → -3, 'D' → 1, 'E' → 0, 'F' -> -3, 'G' → 0, 'H' → 1, 'I' -> -3, 'K' → 0, 'L' → -3, 'M' → -2, 'N' → 6, 'P' → -2, 'Q' → 0, 'R' → 0, 'S' → 1, 'T' → 0, 'V' → -3, 'W' → -4, 'Y' → -2),
+    'P' → Map('A' → -1, 'C' → -3, 'D' → -1, 'E' → -1, 'F' -> -4, 'G' → -2, 'H' → -2, 'I' -> -3, 'K' → -1, 'L' → -3, 'M' → -2, 'N' → -2, 'P' → 7, 'Q' → -1, 'R' → -2, 'S' → -1, 'T' → -1, 'V' → -2, 'W' → -4, 'Y' → -3),
+    'Q' → Map('A' → -1, 'C' → -3, 'D' → 0, 'E' → 2, 'F' -> -3, 'G' → -2, 'H' → 0, 'I' -> -3, 'K' → 1, 'L' → -2, 'M' → 0, 'N' → 0, 'P' → -1, 'Q' → 5, 'R' → 1, 'S' → 0, 'T' → -1, 'V' → -2, 'W' → -2, 'Y' → -1),
+    'R' → Map('A' → -1, 'C' → -3, 'D' → -2, 'E' → 0, 'F' -> -3, 'G' → -2, 'H' → 0, 'I' -> -3, 'K' → 2, 'L' → -2, 'M' → -1, 'N' → 0, 'P' → -2, 'Q' → 1, 'R' → 5, 'S' → -1, 'T' → -1, 'V' → -3, 'W' → -3, 'Y' → -2),
+    'S' → Map('A' → 1, 'C' → -1, 'D' → 0, 'E' → 0, 'F' -> -2, 'G' → 0, 'H' → -1, 'I' -> -2, 'K' → 0, 'L' → -2, 'M' → -1, 'N' → 1, 'P' → -1, 'Q' → 0, 'R' → -1, 'S' → 4, 'T' → 1, 'V' → -2, 'W' → -3, 'Y' → -2),
+    'T' → Map('A' → 0, 'C' → -1, 'D' → -1, 'E' → -1, 'F' -> -2, 'G' → -2, 'H' → -2, 'I' -> -1, 'K' → -1, 'L' → -1, 'M' → -1, 'N' → 0, 'P' → -1, 'Q' → -1, 'R' → -1, 'S' → 1, 'T' → 5, 'V' → 0, 'W' → -2, 'Y' → -2),
+    'V' → Map('A' → 0, 'C' → -1, 'D' → -3, 'E' → -2, 'F' -> -1, 'G' → -3, 'H' → -3, 'I' -> 3, 'K' → -2, 'L' → 1, 'M' → 1, 'N' → -3, 'P' → -2, 'Q' → -2, 'R' → -3, 'S' → -2, 'T' → 0, 'V' → 4, 'W' → -3, 'Y' → -1),
+    'W' → Map('A' → -3, 'C' → -2, 'D' → -4, 'E' → -3, 'F' -> 1, 'G' → -2, 'H' → -2, 'I' -> -3, 'K' → -3, 'L' → -2, 'M' → -1, 'N' → -4, 'P' → -4, 'Q' → -2, 'R' → -3, 'S' → -3, 'T' → -2, 'V' → -3, 'W' → 11, 'Y' → 2),
+    'Y' → Map('A' → -2, 'C' → -2, 'D' → -3, 'E' → -2, 'F' -> 3, 'G' → -3, 'H' → 2, 'I' -> -1, 'K' → -2, 'L' → -1, 'M' → -1, 'N' → -2, 'P' → -3, 'Q' → -1, 'R' → -2, 'S' → -2, 'T' → -2, 'V' → -1, 'W' → 2, 'Y' → 7)
+  )
+
+  def globalAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = blossum62, sigma: Int = 5): (Int, (String, String)) = {
+    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+      if (i == 0 || j == 0) {
+        var ii = i
+        var jj = j
+        while (ii > 0) {
+          rv.append(v(ii - 1))
+          rw.append('-')
+          ii = ii - 1
+        }
+        while (jj > 0) {
+          rv.append('_')
+          rw.append(w(jj - 1))
+          jj = jj - 1
+        }
+        (rv.toString.reverse, rw.toString.reverse)
+      } else backtrack(i)(j) match {
+        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
+        case _   ⇒ output(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+      }
+    }
+    val n = v.length
+    val m = w.length
+    var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ i * -sigma
+      case (0, j) ⇒ j * -sigma
+      case _      ⇒ 0
+    }
+    var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        val sc = scoring(v(i - 1))(w(j - 1))
+        val possibilities = Seq(
+          (s(i - 1)(j) - sigma, -sigma, '↓'),
+          (s(i)(j - 1) - sigma, -sigma, '→'),
+          (s(i - 1)(j - 1) + sc, sc, '↘')
+        )
+        val max = possibilities.maxBy(_._1)
+        s = s.updated(i, s(i).updated(j, max._1))
+        backtrack = backtrack.updated(i, backtrack(i).updated(j, max._3))
+      }
+    }
+    (s(n)(m), output(backtrack, v.length, w.length, new StringBuilder, new StringBuilder))
   }
 }
