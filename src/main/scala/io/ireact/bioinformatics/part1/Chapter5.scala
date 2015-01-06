@@ -25,6 +25,7 @@
 package io.ireact.bioinformatics.part1
 
 import io.ireact.bioinformatics.part1.support.DNAString
+import spray.json._
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
@@ -136,7 +137,7 @@ object Chapter5 {
     s(sink)
   }
 
-  private[this] lazy val blossum62 = Map(
+  private[this] lazy val blossum62: Map[Char, Map[Char, Int]] = Map(
     'A' → Map('A' → 4, 'C' → 0, 'D' → -2, 'E' → -1, 'F' -> -2, 'G' → 0, 'H' → -2, 'I' -> -1, 'K' → -1, 'L' → -1, 'M' → -1, 'N' → -2, 'P' → -1, 'Q' → -1, 'R' → -1, 'S' → 1, 'T' → 0, 'V' → 0, 'W' → -3, 'Y' → -2),
     'C' → Map('A' → 0, 'C' → 9, 'D' → -3, 'E' → -4, 'F' -> -2, 'G' → -3, 'H' → -3, 'I' -> -1, 'K' → -3, 'L' → -1, 'M' → -1, 'N' → -3, 'P' → -3, 'Q' → -3, 'R' → -3, 'S' → -1, 'T' → -1, 'V' → -1, 'W' → -2, 'Y' → -2),
     'D' → Map('A' → -2, 'C' → -3, 'D' → 6, 'E' → 2, 'F' -> -3, 'G' → -1, 'H' → -1, 'I' -> -3, 'K' → -1, 'L' → -4, 'M' → -3, 'N' → 1, 'P' → -1, 'Q' → 0, 'R' → -2, 'S' → 0, 'T' → -1, 'V' → -3, 'W' → -4, 'Y' → -3),
@@ -206,8 +207,7 @@ object Chapter5 {
     (s(n)(m), output(backtrack, v.length, w.length, new StringBuilder, new StringBuilder))
   }
 
-  import spray.json._
-  private[this] val pam250: Map[Char, Map[Char, Int]] = """
+  private[this] lazy val pam250: Map[Char, Map[Char, Int]] = """
       {
         "A": { "A": 2, "C": -2, "E": 0, "D": 0, "G": 1, "F": -3, "I": -1, "H": -1, "K": -1, "M": -1, "L": -2, "N": 0, "Q": 0, "P": 1, "S": 1, "R": -2, "T": 1, "W": -6, "V": 0, "Y": -3},
         "C": {"A": -2, "C": 12, "E": -5, "D": -5, "G": -3, "F": -4, "I": -2, "H": -3, "K": -5, "M": -5, "L": -6, "N": -4, "Q": -5, "P": -3, "S": 0, "R": -4, "T": -2, "W": -8, "V": -2, "Y": 0},
