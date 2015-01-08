@@ -304,4 +304,41 @@ object Chapter5 {
     }
     d(n)(m)
   }
+
+  def fittingAlignment(v: DNAString, w: DNAString): (Int, (String, String)) = {
+    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+      backtrack(i)(j) match {
+        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v.value(i - 1)), rw.append('-'))
+        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w.value(j - 1)))
+        case '↘' ⇒ output(backtrack, i - 1, j - 1, rv.append(v.value(i - 1)), rw.append(w.value(j - 1)))
+        case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
+      }
+    }
+    val n = v.value.length
+    val m = w.value.length
+    var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ 0
+      case (0, j) ⇒ -j
+      case _      ⇒ 0
+    }
+    var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        val sc = if (v.value(i - 1) == w.value(j - 1)) 1 else -1
+        val possibilities = Seq(
+          (s(i - 1)(j) - 1, '↓'),
+          (s(i)(j - 1) - 1, '→'),
+          (s(i - 1)(j - 1) + sc, '↘')
+        )
+        val max = possibilities.maxBy(_._1)
+        s = s.updated(i, s(i).updated(j, max._1))
+        backtrack = backtrack.updated(i, backtrack(i).updated(j, max._2))
+      }
+    }
+    val lastColumn = s.map(_.last)
+    val maxInLastColumn = lastColumn.max
+    val (r, c) = (lastColumn.indexOf(maxInLastColumn), w.value.length)
+    (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
+  }
 }
