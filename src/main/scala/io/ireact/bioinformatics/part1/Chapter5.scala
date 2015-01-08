@@ -277,4 +277,31 @@ object Chapter5 {
     val (r, c) = (index / (m + 1), index % (m + 1))
     (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
   }
+
+  def editDistance(v: String, w: String): Int = {
+    val n = v.length
+    val m = w.length
+    var d: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ i
+      case (0, j) ⇒ j
+      case _      ⇒ 0
+    }
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        if (v(i - 1) == w(j - 1)) {
+          d = d.updated(i, d(i).updated(j, d(i - 1)(j - 1)))
+        } else {
+          val possibilities = Seq(
+            d(i - 1)(j) + 1,
+            d(i)(j - 1) + 1,
+            d(i - 1)(j - 1) + 1
+          )
+          val min = possibilities.min
+          d = d.updated(i, d(i).updated(j, min))
+        }
+      }
+    }
+    d(n)(m)
+  }
 }
