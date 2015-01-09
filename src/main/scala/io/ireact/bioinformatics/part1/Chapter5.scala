@@ -341,4 +341,40 @@ object Chapter5 {
     val (r, c) = (lastColumn.indexOf(maxInLastColumn), w.value.length)
     (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
   }
+
+  def overlapAlignment(v: String, w: String): (Int, (String, String)) = {
+    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+      backtrack(i)(j) match {
+        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
+        case '↘' ⇒ output(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+        case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
+      }
+    }
+    val n = v.length
+    val m = w.length
+    var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ 0
+      case (0, j) ⇒ j * -2
+      case _      ⇒ 0
+    }
+    var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        val sc = if (v(i - 1) == w(j - 1)) 1 else -2
+        val possibilities = Seq(
+          (s(i - 1)(j) - 2, '↓'),
+          (s(i)(j - 1) - 2, '→'),
+          (s(i - 1)(j - 1) + sc, '↘')
+        )
+        val max = possibilities.maxBy(_._1)
+        s = s.updated(i, s(i).updated(j, max._1))
+        backtrack = backtrack.updated(i, backtrack(i).updated(j, max._2))
+      }
+    }
+    val maxInLastRow = s(n).max
+    val (r, c) = (n, s(n).lastIndexOf(maxInLastRow))
+    (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
+  }
 }
