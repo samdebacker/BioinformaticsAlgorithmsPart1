@@ -239,11 +239,11 @@ object Chapter5 {
       }
   }
 
-  @tailrec private[this] def output(v: String, w: String)(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+  @tailrec private[this] def output(v: String, w: String, backtrack: IndexedSeq[IndexedSeq[Char]])(i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
     backtrack(i)(j) match {
-      case '↓' ⇒ output(v, w)(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
-      case '→' ⇒ output(v, w)(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
-      case '↘' ⇒ output(v, w)(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+      case '↓' ⇒ output(v, w, backtrack)(i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+      case '→' ⇒ output(v, w, backtrack)(i, j - 1, rv.append('-'), rw.append(w(j - 1)))
+      case '↘' ⇒ output(v, w, backtrack)(i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
       case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
     }
   }
@@ -276,7 +276,7 @@ object Chapter5 {
     val allMax = s.map(_.max).max
     val index = s.flatten.indexOf(allMax)
     val (r, c) = (index / (m + 1), index % (m + 1))
-    (s(r)(c), output(v, w)(backtrack, r, c, new StringBuilder, new StringBuilder))
+    (s(r)(c), output(v, w, backtrack)(r, c, new StringBuilder, new StringBuilder))
   }
 
   def editDistance(v: String, w: String): Int = {
@@ -332,7 +332,7 @@ object Chapter5 {
     val lastColumn = s.map(_.last)
     val maxInLastColumn = lastColumn.max
     val (r, c) = (lastColumn.indexOf(maxInLastColumn), w.value.length)
-    (s(r)(c), output(v.value, w.value)(backtrack, r, c, new StringBuilder, new StringBuilder))
+    (s(r)(c), output(v.value, w.value, backtrack)(r, c, new StringBuilder, new StringBuilder))
   }
 
   def overlapAlignment(v: String, w: String): (Int, (String, String)) = {
@@ -360,7 +360,7 @@ object Chapter5 {
     }
     val maxInLastRow = s(n).max
     val (r, c) = (n, s(n).lastIndexOf(maxInLastRow))
-    (s(r)(c), output(v, w)(backtrack, r, c, new StringBuilder, new StringBuilder))
+    (s(r)(c), output(v, w, backtrack)(r, c, new StringBuilder, new StringBuilder))
   }
 
   def affineGapAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = blossum62, sigma: Int = 11, epsilon: Int = 1): (Int, (String, String)) = {
