@@ -1,17 +1,21 @@
-name := """Bioinformatics Algorithms Part 1"""
+organization := "iReact.io"
+
+name := "Bioinformatics Algorithms Part 1"
 
 version := "1.0"
 
 scalaVersion := "2.11.4"
 
-scalacOptions ++= Seq("-feature", "-deprecation")
+scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
+
+libraryDependencies += "org.scalatest" %% "scalatest"      % "2.2.1" % "test"
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest"      % "2.2.1" % "test",
-  "org.scalanlp"  %% "breeze"         % "0.10",
-  //,"org.scalanlp"  %% "breeze-natives" % "0.10"
-  "io.spray"      %% "spray-json"     % "1.3.1"
+                       "org.scalanlp"  %% "breeze"         % "0.10"
+//                    ,"org.scalanlp"  %% "breeze-natives" % "0.10"
 )
+libraryDependencies += "io.spray"      %% "spray-json"     % "1.3.1"
 
 resolvers ++= Seq(
   "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"

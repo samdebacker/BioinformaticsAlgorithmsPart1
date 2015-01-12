@@ -239,15 +239,16 @@ object Chapter5 {
       }
   }
 
-  def localAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = pam250, sigma: Int = 5): (Int, (String, String)) = {
-    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
-      backtrack(i)(j) match {
-        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
-        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
-        case '↘' ⇒ output(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
-        case 'B' ⇒ (rv.toString.reverse, rw.toString.reverse)
-      }
+  @tailrec private[this] def output(v: String, w: String)(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+    backtrack(i)(j) match {
+      case '↓' ⇒ output(v, w)(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+      case '→' ⇒ output(v, w)(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
+      case '↘' ⇒ output(v, w)(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+      case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
     }
+  }
+
+  def localAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = pam250, sigma: Int = 5): (Int, (String, String)) = {
     val n = v.length
     val m = w.length
     var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
@@ -275,7 +276,7 @@ object Chapter5 {
     val allMax = s.map(_.max).max
     val index = s.flatten.indexOf(allMax)
     val (r, c) = (index / (m + 1), index % (m + 1))
-    (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
+    (s(r)(c), output(v, w)(backtrack, r, c, new StringBuilder, new StringBuilder))
   }
 
   def editDistance(v: String, w: String): Int = {
@@ -306,14 +307,6 @@ object Chapter5 {
   }
 
   def fittingAlignment(v: DNAString, w: DNAString): (Int, (String, String)) = {
-    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
-      backtrack(i)(j) match {
-        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v.value(i - 1)), rw.append('-'))
-        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w.value(j - 1)))
-        case '↘' ⇒ output(backtrack, i - 1, j - 1, rv.append(v.value(i - 1)), rw.append(w.value(j - 1)))
-        case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
-      }
-    }
     val n = v.value.length
     val m = w.value.length
     var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
@@ -339,18 +332,10 @@ object Chapter5 {
     val lastColumn = s.map(_.last)
     val maxInLastColumn = lastColumn.max
     val (r, c) = (lastColumn.indexOf(maxInLastColumn), w.value.length)
-    (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
+    (s(r)(c), output(v.value, w.value)(backtrack, r, c, new StringBuilder, new StringBuilder))
   }
 
   def overlapAlignment(v: String, w: String): (Int, (String, String)) = {
-    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
-      backtrack(i)(j) match {
-        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
-        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
-        case '↘' ⇒ output(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
-        case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
-      }
-    }
     val n = v.length
     val m = w.length
     var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
@@ -375,6 +360,90 @@ object Chapter5 {
     }
     val maxInLastRow = s(n).max
     val (r, c) = (n, s(n).lastIndexOf(maxInLastRow))
-    (s(r)(c), output(backtrack, r, c, new StringBuilder, new StringBuilder))
+    (s(r)(c), output(v, w)(backtrack, r, c, new StringBuilder, new StringBuilder))
+  }
+
+  def affineGapAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = blossum62, sigma: Int = 11, epsilon: Int = 1): (Int, (String, String)) = {
+    @tailrec def output(lowerBacktrack: IndexedSeq[IndexedSeq[Char]],
+      middleBacktrack: IndexedSeq[IndexedSeq[Char]],
+      upperBacktrack: IndexedSeq[IndexedSeq[Char]])(last: Char, i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+      if (i == 0 && j == 0) {
+        val result = (rv.toString.reverse, rw.toString.reverse)
+        println(result)
+        result
+      } else {
+        last match {
+          case '↘' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(middleBacktrack(i)(j), i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+          case '↓' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(lowerBacktrack(i)(j), i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+          case '→' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(upperBacktrack(i)(j), i, j - 1, rw.append('-'), rv.append(w(j - 1)))
+        }
+      }
+    }
+    val n = v.length
+    val m = w.length
+    val minInfinity = -sigma - (n + m) * epsilon
+    var lower: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ minInfinity
+      case (i, 0) ⇒ -sigma - (i - 1) * epsilon
+      case (0, j) ⇒ minInfinity
+      case _      ⇒ 0
+    }
+    var upper: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ minInfinity
+      case (i, 0) ⇒ minInfinity
+      case (0, j) ⇒ -sigma - (j - 1) * epsilon
+      case _      ⇒ 0
+    }
+    var middle: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ 0
+      case (i, 0) ⇒ minInfinity
+      case (0, j) ⇒ minInfinity
+      case _      ⇒ 0
+    }
+    var lowerBacktrack = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (i, 0) ⇒ '↓'
+      case _      ⇒ ' '
+    }
+    var upperBacktrack = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, j) ⇒ '→'
+      case _      ⇒ ' '
+    }
+    var middleBacktrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+    for (i ← 1 to n) {
+      for (j ← 1 to m) {
+        val lowerPossibilities = Seq(
+          (lower(i - 1)(j) - epsilon, '↓'),
+          (middle(i - 1)(j) - sigma, '↘')
+        )
+        val lowerMax = lowerPossibilities.maxBy(_._1)
+        lower = lower.updated(i, lower(i).updated(j, lowerMax._1))
+        lowerBacktrack = lowerBacktrack.updated(i, lowerBacktrack(i).updated(j, lowerMax._2))
+        val upperPossibilities = Seq(
+          (upper(i)(j - 1) - epsilon, '→'),
+          (middle(i)(j - 1) - sigma, '↘')
+        )
+        val upperMax = upperPossibilities.maxBy(_._1)
+        upper = upper.updated(i, upper(i).updated(j, upperMax._1))
+        upperBacktrack = upperBacktrack.updated(i, upperBacktrack(i).updated(j, upperMax._2))
+        val score = scoring(v(i - 1))(w(j - 1))
+        val middlePossibilities = Seq(
+          (lower(i - 1)(j - 1), '↓'),
+          (upper(i - 1)(j - 1), '→'),
+          (middle(i - 1)(j - 1), '↘')
+        )
+        val middleMax = middlePossibilities.maxBy(_._1)
+        middle = middle.updated(i, middle(i).updated(j, middleMax._1 + score))
+        middleBacktrack = middleBacktrack.updated(i, middleBacktrack(i).updated(j, middleMax._2))
+      }
+    }
+    val score = Seq((middle(n)(m), '↘'), (upper(n)(m), '→'), (lower(n)(m), '↓')).maxBy(_._1)
+//    println(s"Score = $score")
+//    println("lower\n" + lower.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+//    println(lowerBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+//    println("middle\n" + middle.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+//    println(middleBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+//    println("upper\n" + upper.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+//    println(upperBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    (score._1, output(lowerBacktrack, middleBacktrack, upperBacktrack)(score._2, n, m, new StringBuilder, new StringBuilder))
   }
 }

@@ -363,4 +363,50 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       overlapAlignment(v, w) shouldBe (rscore, (rv, rw))
     }
   }
+
+  feature("affineGapAlignment") {
+    scenario("example") {
+      val v = "PRTEINS"
+      val w = "PRTWPSEIN"
+      val rscore = 8
+      val rv = "PRT---EINS"
+      val rw = "PRTWPSEIN-"
+      affineGapAlignment(v, w) shouldBe (rscore, (rv, rw))
+    }
+    scenario("example2") {
+      val v = "AHRQPQ"
+      val w = "AHED"
+      val rscore = 0
+      val rv = "AHRQPQ"
+      val rw = "AHE--D"
+      affineGapAlignment(v, w) shouldBe (rscore, (rv, rw))
+    }
+    scenario("extra dataset") {
+      // NOT CORRECT !
+      val v = "YHFDVPDCWAHRYWVENPQAIAQMEQICFNWFPSMMMKQPHVFKVDHHMSCRWLPIRGKKCSSCCTRMRVRTVWE"
+      val w = "YHEDVAHEDAIAQMVNTFGFVWQICLNQFPSMMMKIYWIAVLSAHVADRKTWSKHMSCRWLPIISATCARMRVRTVWE"
+      val escore = 144
+      // actual expected
+      val ev = "YHFDVPDCWAHRYWVENPQAIAQME-------QICFNWFPSMMMK-------QPHVFKV---DHHMSCRWLPIRGKKCSSCCTRMRVRTVWE"
+      val ew = "YHEDV----AHE------DAIAQMVNTFGFVWQICLNQFPSMMMKIYWIAVLSAHVADRKTWSKHMSCRWLPI----ISATCARMRVRTVWE"
+//      val ev = "YHFDVPDCWAHRYWVENPQAIAQME-T-G-V-QICLNQFPSMMMKI-W-A-LQPHVFKV-T-SKHMSCRWLPI----ISATCARMRVRTVWE"
+//      val ew = "YHEDV----AHE------DAIAQMVN-F-F-WQICFNWFPSMMMK-Y-I-V-SAHVADRK-WDHHMSCRWLPIRGKKCSSCCTRMRVRTVWE"
+      val (rscore, (rv, rw)) = affineGapAlignment(v, w)
+      rscore shouldBe escore
+      rv shouldBe ev
+      rw shouldBe ew
+    }
+    scenario("interactive quiz") {
+      // NOT CORRECT?
+      val v = "WVGNPRYGKWGPKTMFMMIYELISVAHFSFWCTVKLCFNQDERGELDYFAMWFQVRRGSENVPPYWIKQAYICPMEECAVKTCGIQQD"
+      val w = "WVGNPRYFMMIYESFWFTDERGLLIYNRPMQLCTFAMWFNVQACGICHEIQQD"
+      val escore = 82
+      val ev = "WVGNPRYGKWGPKTMFMMIYELISVAHFSFWCTVKLCFNQDERGELDY-R-M-L-TFAMWFQVRRGSENVPPYWIKQAYICPMEECAVKTCGI-H-IQQD"
+      val ew = "WVGNPRY--------FMMIYE-------SFWFT-------DERGLLIYN-P-Q-C-FAMWFNVQ-------------------------ACGIC-E-QQD"
+      val (rscore, (rv, rw)) = affineGapAlignment(v, w)
+      rscore shouldBe escore
+      rv shouldBe ev
+      rw shouldBe ew
+    }
+  }
 }
