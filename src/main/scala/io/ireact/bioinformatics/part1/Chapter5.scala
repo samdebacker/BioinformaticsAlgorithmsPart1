@@ -90,7 +90,7 @@ object Chapter5 {
       else backtrack(i)(j) match {
         case '↓' ⇒ output(backtrack, i - 1, j, result)
         case '→' ⇒ output(backtrack, i, j - 1, result)
-        case _   ⇒ output(backtrack, i - 1, j - 1, result.append(v.value(i - 1)))
+        case '↘' ⇒ output(backtrack, i - 1, j - 1, result.append(v.value(i - 1)))
       }
     }
     output(lcsBacktrack, v.value.length, w.value.length, new StringBuilder)
@@ -160,28 +160,16 @@ object Chapter5 {
     'Y' → Map('A' → -2, 'C' → -2, 'D' → -3, 'E' → -2, 'F' -> 3, 'G' → -3, 'H' → 2, 'I' -> -1, 'K' → -2, 'L' → -1, 'M' → -1, 'N' → -2, 'P' → -3, 'Q' → -1, 'R' → -2, 'S' → -2, 'T' → -2, 'V' → -1, 'W' → 2, 'Y' → 7)
   )
 
-  def globalAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = blossum62, sigma: Int = 5): (Int, (String, String)) = {
-    @tailrec def output(backtrack: IndexedSeq[IndexedSeq[Char]], i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
-      if (i == 0 || j == 0) {
-        var ii = i
-        var jj = j
-        while (ii > 0) {
-          rv.append(v(ii - 1))
-          rw.append('-')
-          ii = ii - 1
-        }
-        while (jj > 0) {
-          rv.append('_')
-          rw.append(w(jj - 1))
-          jj = jj - 1
-        }
-        (rv.toString.reverse, rw.toString.reverse)
-      } else backtrack(i)(j) match {
-        case '↓' ⇒ output(backtrack, i - 1, j, rv.append(v(i - 1)), rw.append('-'))
-        case '→' ⇒ output(backtrack, i, j - 1, rv.append('-'), rw.append(w(j - 1)))
-        case _   ⇒ output(backtrack, i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
-      }
+  @tailrec private[this] def output(v: String, w: String, backtrack: IndexedSeq[IndexedSeq[Char]])(i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
+    backtrack(i)(j) match {
+      case '↓' ⇒ output(v, w, backtrack)(i - 1, j, rv.append(v(i - 1)), rw.append('-'))
+      case '→' ⇒ output(v, w, backtrack)(i, j - 1, rv.append('-'), rw.append(w(j - 1)))
+      case '↘' ⇒ output(v, w, backtrack)(i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
+      case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
     }
+  }
+
+  def globalAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = blossum62, sigma: Int = 5): (Int, (String, String)) = {
     val n = v.length
     val m = w.length
     var s: IndexedSeq[IndexedSeq[Int]] = IndexedSeq.tabulate(n + 1, m + 1) {
@@ -190,7 +178,12 @@ object Chapter5 {
       case (0, j) ⇒ j * -sigma
       case _      ⇒ 0
     }
-    var backtrack = IndexedSeq.fill(n + 1, m + 1)(' ')
+    var backtrack = IndexedSeq.tabulate(n + 1, m + 1) {
+      case (0, 0) ⇒ ' '
+      case (i, 0) ⇒ '↓'
+      case (0, j) ⇒ '→'
+      case _      ⇒ ' '
+    }
     for (i ← 1 to n) {
       for (j ← 1 to m) {
         val sc = scoring(v(i - 1))(w(j - 1))
@@ -204,7 +197,7 @@ object Chapter5 {
         backtrack = backtrack.updated(i, backtrack(i).updated(j, max._2))
       }
     }
-    (s(n)(m), output(backtrack, v.length, w.length, new StringBuilder, new StringBuilder))
+    (s(n)(m), output(v, w, backtrack)(v.length, w.length, new StringBuilder, new StringBuilder))
   }
 
   private[this] lazy val pam250: Map[Char, Map[Char, Int]] = """
@@ -234,18 +227,8 @@ object Chapter5 {
     case (k, v) ⇒
       k(0) -> v.asJsObject.fields.map {
         case (k, v) ⇒
-          k(0) -> v.toString().toInt
-
+          k(0) -> v.asInstanceOf[JsNumber].value.toInt
       }
-  }
-
-  @tailrec private[this] def output(v: String, w: String, backtrack: IndexedSeq[IndexedSeq[Char]])(i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
-    backtrack(i)(j) match {
-      case '↓' ⇒ output(v, w, backtrack)(i - 1, j, rv.append(v(i - 1)), rw.append('-'))
-      case '→' ⇒ output(v, w, backtrack)(i, j - 1, rv.append('-'), rw.append(w(j - 1)))
-      case '↘' ⇒ output(v, w, backtrack)(i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
-      case _   ⇒ (rv.toString.reverse, rw.toString.reverse)
-    }
   }
 
   def localAlignment(v: String, w: String, scoring: Map[Char, Map[Char, Int]] = pam250, sigma: Int = 5): (Int, (String, String)) = {
@@ -368,14 +351,12 @@ object Chapter5 {
       middleBacktrack: IndexedSeq[IndexedSeq[Char]],
       upperBacktrack: IndexedSeq[IndexedSeq[Char]])(last: Char, i: Int, j: Int, rv: StringBuilder, rw: StringBuilder): (String, String) = {
       if (i == 0 && j == 0) {
-        val result = (rv.toString.reverse, rw.toString.reverse)
-        println(result)
-        result
+        (rv.toString.reverse, rw.toString.reverse)
       } else {
         last match {
           case '↘' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(middleBacktrack(i)(j), i - 1, j - 1, rv.append(v(i - 1)), rw.append(w(j - 1)))
           case '↓' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(lowerBacktrack(i)(j), i - 1, j, rv.append(v(i - 1)), rw.append('-'))
-          case '→' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(upperBacktrack(i)(j), i, j - 1, rw.append('-'), rv.append(w(j - 1)))
+          case '→' ⇒ output(lowerBacktrack, middleBacktrack, upperBacktrack)(upperBacktrack(i)(j), i, j - 1, rv.append('-'), rw.append(w(j - 1)))
         }
       }
     }
@@ -437,13 +418,13 @@ object Chapter5 {
       }
     }
     val score = Seq((middle(n)(m), '↘'), (upper(n)(m), '→'), (lower(n)(m), '↓')).maxBy(_._1)
-//    println(s"Score = $score")
-//    println("lower\n" + lower.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
-//    println(lowerBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
-//    println("middle\n" + middle.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
-//    println(middleBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
-//    println("upper\n" + upper.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
-//    println(upperBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    //    println(s"Score = $score")
+    //    println("lower\n" + lower.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    //    println(lowerBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    //    println("middle\n" + middle.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    //    println(middleBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    //    println("upper\n" + upper.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
+    //    println(upperBacktrack.map(_.map(_.toString.padTo(3, ' '))).map(_.mkString(" ")).mkString("\n"))
     (score._1, output(lowerBacktrack, middleBacktrack, upperBacktrack)(score._2, n, m, new StringBuilder, new StringBuilder))
   }
 }

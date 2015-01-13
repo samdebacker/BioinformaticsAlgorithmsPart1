@@ -371,6 +371,7 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       val rscore = 8
       val rv = "PRT---EINS"
       val rw = "PRTWPSEIN-"
+      println(s"$v\n$w")
       affineGapAlignment(v, w) shouldBe (rscore, (rv, rw))
     }
     scenario("example2") {
@@ -382,28 +383,24 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       affineGapAlignment(v, w) shouldBe (rscore, (rv, rw))
     }
     scenario("extra dataset") {
-      // NOT CORRECT !
       val v = "YHFDVPDCWAHRYWVENPQAIAQMEQICFNWFPSMMMKQPHVFKVDHHMSCRWLPIRGKKCSSCCTRMRVRTVWE"
       val w = "YHEDVAHEDAIAQMVNTFGFVWQICLNQFPSMMMKIYWIAVLSAHVADRKTWSKHMSCRWLPIISATCARMRVRTVWE"
       val escore = 144
-      // actual expected
       val ev = "YHFDVPDCWAHRYWVENPQAIAQME-------QICFNWFPSMMMK-------QPHVFKV---DHHMSCRWLPIRGKKCSSCCTRMRVRTVWE"
       val ew = "YHEDV----AHE------DAIAQMVNTFGFVWQICLNQFPSMMMKIYWIAVLSAHVADRKTWSKHMSCRWLPI----ISATCARMRVRTVWE"
-//      val ev = "YHFDVPDCWAHRYWVENPQAIAQME-T-G-V-QICLNQFPSMMMKI-W-A-LQPHVFKV-T-SKHMSCRWLPI----ISATCARMRVRTVWE"
-//      val ew = "YHEDV----AHE------DAIAQMVN-F-F-WQICFNWFPSMMMK-Y-I-V-SAHVADRK-WDHHMSCRWLPIRGKKCSSCCTRMRVRTVWE"
       val (rscore, (rv, rw)) = affineGapAlignment(v, w)
       rscore shouldBe escore
       rv shouldBe ev
       rw shouldBe ew
     }
     scenario("interactive quiz") {
-      // NOT CORRECT?
-      val v = "WVGNPRYGKWGPKTMFMMIYELISVAHFSFWCTVKLCFNQDERGELDYFAMWFQVRRGSENVPPYWIKQAYICPMEECAVKTCGIQQD"
-      val w = "WVGNPRYFMMIYESFWFTDERGLLIYNRPMQLCTFAMWFNVQACGICHEIQQD"
-      val escore = 82
-      val ev = "WVGNPRYGKWGPKTMFMMIYELISVAHFSFWCTVKLCFNQDERGELDY-R-M-L-TFAMWFQVRRGSENVPPYWIKQAYICPMEECAVKTCGI-H-IQQD"
-      val ew = "WVGNPRY--------FMMIYE-------SFWFT-------DERGLLIYN-P-Q-C-FAMWFNVQ-------------------------ACGIC-E-QQD"
+      val v = "CFQLRDNTNVRKPIIYIEPPWVNSVHECSKMMEYWYFDECDTYSVHIDMHPYMKINIPKDKIGYDVAYGLWFACWL"
+      val w = "WFQGRDNYNVRNPIIYTLSIARHIDEPPWVNSVHECSKMMEYWYFDECDTYSVHIDMHPYMKINIPKDKIGYDVAYGLWFAFWL"
+      val escore = 383
+      val ev = "CFQLRDNTNVRKPIIYI--------EPPWVNSVHECSKMMEYWYFDECDTYSVHIDMHPYMKINIPKDKIGYDVAYGLWFACWL"
+      val ew = "WFQGRDNYNVRNPIIYTLSIARHIDEPPWVNSVHECSKMMEYWYFDECDTYSVHIDMHPYMKINIPKDKIGYDVAYGLWFAFWL"
       val (rscore, (rv, rw)) = affineGapAlignment(v, w)
+      //println(s"$rscore\n$rv\n$rw")
       rscore shouldBe escore
       rv shouldBe ev
       rw shouldBe ew
