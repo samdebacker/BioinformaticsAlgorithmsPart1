@@ -49,4 +49,10 @@ object Chapter6 {
       r
     }.reverse.tail
   }
+
+  def countBreakpoints(p: Permutation): Int = {
+    (0 +: p).zip(p :+ (p.length + 1)).foldLeft(0) {
+      case (result, (left, right)) ⇒ result + (if (right - left == 1) 0 else 1)
+    }
+  }
 }
