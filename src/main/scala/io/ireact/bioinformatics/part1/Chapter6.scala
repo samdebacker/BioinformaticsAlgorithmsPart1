@@ -76,4 +76,16 @@ object Chapter6 {
     }
     cycleToChromosone_(c, IndexedSeq.empty[Int])
   }
+
+  type Genome = Seq[Permutation]
+
+  def coloredEdges(g: Genome): Seq[(Int, Int)] = {
+    g.foldLeft(Seq.empty[(Int, Int)]) {
+      case (result, permutation) ⇒
+        val nodes = chromosoneToCycle(permutation :+ permutation.head)
+        (1 to permutation.length).foldLeft(result) { (result, j) ⇒
+          result :+ (nodes(2 * j - 1), nodes(2 * j))
+        }
+    }
+  }
 }
