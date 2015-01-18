@@ -65,4 +65,15 @@ object Chapter6 {
         else Seq(-2 * chromosone, -2 * chromosone - 1)
     }
   }
+
+  def cycleToChromosone(c: Cycle): Permutation = {
+    @tailrec def cycleToChromosone_(c: Cycle, result: Cycle): Cycle = {
+      if (c.isEmpty) result
+      else {
+        val twoNodes = c.take(2)
+        cycleToChromosone_(c.drop(2), result :+ (if (twoNodes(0) < twoNodes(1)) twoNodes(1) / 2 else -twoNodes(0) / 2))
+      }
+    }
+    cycleToChromosone_(c, IndexedSeq.empty[Int])
+  }
 }
