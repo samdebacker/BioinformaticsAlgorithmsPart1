@@ -78,8 +78,9 @@ object Chapter6 {
   }
 
   type Genome = Seq[Permutation]
+  type GenomePath = Seq[(Int, Int)]
 
-  def coloredEdges(g: Genome): Seq[(Int, Int)] = {
+  def coloredEdges(g: Genome): GenomePath = {
     g.foldLeft(Seq.empty[(Int, Int)]) {
       case (result, permutation) ⇒
         val nodes = chromosoneToCycle(permutation :+ permutation.head)
@@ -87,5 +88,19 @@ object Chapter6 {
           result :+ (nodes(2 * j - 1), nodes(2 * j))
         }
     }
+  }
+
+  def graphToGenome(gp: GenomePath): Genome = {
+    val blacks = (1 to gp.length).map { i ⇒ (2 * i - 1, 2 * i) }
+    blacks.zip(gp).foldLeft(Seq(IndexedSeq.empty[Int])) {
+      case (cycles, ((bl, br), (cl, cr))) ⇒
+        val toAdd = if (br == cl) Seq(bl, br) else Seq(br, bl)
+        val newHead = cycles.head ++ toAdd
+        var result = newHead +: cycles.tail
+        if (cr < cl) {
+          result = IndexedSeq.empty[Int] +: result
+        }
+        result
+    }.tail.reverse.map(cycleToChromosone(_))
   }
 }
