@@ -55,4 +55,14 @@ object Chapter6 {
       case (result, (left, right)) ⇒ result + (if (right - left == 1) 0 else 1)
     }
   }
+
+  type Cycle = IndexedSeq[Int]
+
+  def chromosoneToCycle(p: Permutation): Cycle = {
+    p.zipWithIndex.flatMap {
+      case (chromosone, index) ⇒
+        if (chromosone > 0) Seq(2 * chromosone - 1, 2 * chromosone)
+        else Seq(-2 * chromosone, -2 * chromosone - 1)
+    }
+  }
 }
