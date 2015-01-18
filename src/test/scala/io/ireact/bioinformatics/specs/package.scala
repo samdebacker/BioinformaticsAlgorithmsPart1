@@ -26,9 +26,21 @@ package io.ireact.bioinformatics
 
 import org.scalatest.Tag
 
+import scala.annotation.tailrec
+
 package object specs {
   // Run with
   //  testOnly FullSpec -- -l SlowTest
   // to exclude tests that are marked as slow
   object SlowTest extends Tag("io.ireact.bioinformatics.specs.SlowTest")
+
+  @tailrec def sameAs[A](l: Traversable[A], r: Traversable[A]): Boolean = {
+    import scala.language.postfixOps
+    if (l.isEmpty) r.isEmpty
+    else {
+      val (e, f) = r span (l.head !=)
+      if (f.isEmpty) false
+      else sameAs(l.tail, e ++ f.tail)
+    }
+  }
 }

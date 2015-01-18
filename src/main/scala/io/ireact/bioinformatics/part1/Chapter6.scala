@@ -24,6 +24,8 @@
 
 package io.ireact.bioinformatics.part1
 
+import io.ireact.bioinformatics.part1.support.DNAString
+
 import scala.annotation.tailrec
 
 object Chapter6 {
@@ -102,5 +104,18 @@ object Chapter6 {
         }
         result
     }.tail.reverse.map(cycleToChromosone(_))
+  }
+
+  def sharedKMers(k: Int, l: DNAString, r: DNAString): IndexedSeq[(Int, Int)] = {
+    (0 to l.value.length - k).foldLeft(IndexedSeq.empty[(Int, Int)]) { (result, indexL) ⇒
+      val kMer = l.value.substring(indexL, indexL + k)
+      val kMerReverseComplement = Chapter1.reverseComplement(kMer)
+      (0 to r.value.length - k).foldLeft(result) { (result, indexR) ⇒
+        val candidate = r.value.substring(indexR, indexR + k)
+        if (candidate == kMer || candidate == kMerReverseComplement) {
+          (indexL, indexR) +: result
+        } else result
+      }
+    }.reverse
   }
 }

@@ -25,6 +25,8 @@
 package io.ireact.bioinformatics.part1.specs
 
 import io.ireact.bioinformatics.part1.Chapter6._
+import io.ireact.bioinformatics.part1.support.DNAString
+import io.ireact.bioinformatics.specs.sameAs
 import org.scalatest.{ FeatureSpec, Matchers }
 
 import scala.io.Source
@@ -163,6 +165,40 @@ class Chapter6Spec extends FeatureSpec with Matchers {
       val gp = Seq((1, 3), (4, 5), (6, 7), (8, 9), (10, 12), (11, 13), (14, 15), (16, 17), (18, 19), (20, 22), (21, 23), (24, 25), (26, 27), (28, 30), (29, 31), (32, 33), (34, 36), (35, 38), (37, 40), (39, 42), (41, 44), (43, 2), (46, 48), (47, 50), (49, 52), (51, 54), (53, 55), (56, 57), (58, 60), (59, 61), (62, 63), (64, 66), (65, 68), (67, 70), (69, 71), (72, 73), (74, 76), (75, 77), (78, 79), (80, 82), (81, 83), (84, 85), (86, 88), (87, 90), (89, 92), (91, 93), (94, 96), (95, 98), (97, 99), (100, 102), (101, 104), (103, 45), (106, 108), (107, 109), (110, 112), (111, 114), (113, 116), (115, 118), (117, 120), (119, 121), (122, 123), (124, 125), (126, 127), (128, 129), (130, 131), (132, 134), (133, 136), (135, 138), (137, 140), (139, 142), (141, 144), (143, 105), (146, 147), (148, 150), (149, 152), (151, 153), (154, 155), (156, 157), (158, 160), (159, 162), (161, 164), (163, 166), (165, 167), (168, 170), (169, 172), (171, 174), (173, 176), (175, 178), (177, 180), (179, 181), (182, 184), (183, 145), (186, 187), (188, 189), (190, 191), (192, 193), (194, 196), (195, 198), (197, 200), (199, 202), (201, 204), (203, 205), (206, 208), (207, 210), (209, 211), (212, 214), (213, 216), (215, 218), (217, 220), (219, 222), (221, 224), (223, 226), (225, 227), (228, 229), (230, 185), (232, 234), (233, 235), (236, 237), (238, 239), (240, 241), (242, 243), (244, 246), (245, 247), (248, 250), (249, 252), (251, 253), (254, 255), (256, 257), (258, 259), (260, 262), (261, 263), (264, 266), (265, 268), (267, 269), (270, 272), (271, 273), (274, 275), (276, 231), (277, 279), (280, 282), (281, 283), (284, 286), (285, 287), (288, 289), (290, 291), (292, 294), (293, 295), (296, 298), (297, 299), (300, 302), (301, 304), (303, 306), (305, 308), (307, 310), (309, 311), (312, 313), (314, 315), (316, 317), (318, 320), (319, 321), (322, 324), (323, 325), (326, 327), (328, 329), (330, 332), (331, 278))
       val expectedResult = readGenome("(-1 +2 +3 +4 +5 -6 +7 +8 +9 +10 -11 +12 +13 +14 -15 +16 +17 -18 -19 -20 -21 -22)(+23 -24 -25 -26 -27 +28 +29 -30 +31 +32 -33 -34 -35 +36 +37 -38 +39 +40 -41 +42 +43 -44 -45 -46 +47 -48 -49 +50 -51 -52)(+53 -54 +55 -56 -57 -58 -59 -60 +61 +62 +63 +64 +65 +66 -67 -68 -69 -70 -71 -72)(+73 +74 -75 -76 +77 +78 +79 -80 -81 -82 -83 +84 -85 -86 -87 -88 -89 -90 +91 -92)(+93 +94 +95 +96 +97 -98 -99 -100 -101 -102 +103 -104 -105 +106 -107 -108 -109 -110 -111 -112 -113 +114 +115)(+116 -117 +118 +119 +120 +121 +122 -123 +124 -125 -126 +127 +128 +129 +130 -131 +132 -133 -134 +135 -136 +137 +138)(-139 +140 -141 +142 -143 +144 +145 +146 -147 +148 -149 +150 -151 -152 -153 -154 -155 +156 +157 +158 +159 -160 +161 -162 +163 +164 +165 -166)")
       graphToGenome(gp) shouldBe expectedResult
+    }
+  }
+
+  feature("sharedKMers") {
+    scenario("example") {
+      val k = 3
+      val l = DNAString("AAACTCATC")
+      val r = DNAString("TTTCAAATC")
+      val expectedResult = Seq((0, 4), (0, 0), (4, 2), (6, 6))
+      assert(sameAs(sharedKMers(k, l, r), expectedResult))
+    }
+    scenario("extra dataset") {
+      val k = 17
+      val s = Source.fromFile("src/main/resources/sharedKMersExtraDatasetInput.txt").getLines()
+      val l = DNAString.from(s.next()).get
+      val r = DNAString.from(s.next()).get
+      val expectedResult = Source.fromFile("src/main/resources/sharedKMersExtraDatasetOutput.txt")
+        .getLines()
+        .map(s ⇒ s.substring(1, s.length - 1).split(',').map(_.trim.toInt))
+        .map(a ⇒ (a(0), a(1)))
+        .toIndexedSeq
+      assert(sameAs(sharedKMers(k, l, r), expectedResult))
+    }
+    scenario("interactive quiz") {
+      val k = 15
+      val s = Source.fromFile("src/main/resources/sharedKMersInteractiveQuizInput.txt").getLines()
+      val l = DNAString.from(s.next()).get
+      val r = DNAString.from(s.next()).get
+      val expectedResult = Source.fromFile("src/main/resources/sharedKMersInteractiveQuizOutput.txt")
+        .getLines()
+        .map(s ⇒ s.substring(1, s.length - 1).split(',').map(_.trim.toInt))
+        .map(a ⇒ (a(0), a(1)))
+        .toIndexedSeq
+      assert(sameAs(sharedKMers(k, l, r), expectedResult))
     }
   }
 }
