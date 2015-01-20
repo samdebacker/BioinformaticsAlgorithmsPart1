@@ -4,7 +4,7 @@ name := "Bioinformatics Algorithms Part 1"
 
 version := "1.0"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.5"
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 
@@ -24,4 +24,4 @@ resolvers ++= Seq(
 // display test duration
 testOptions in Test += Tests.Argument("-oD")
 
-//parallelExecution in Test := false
+parallelExecution in Test := false

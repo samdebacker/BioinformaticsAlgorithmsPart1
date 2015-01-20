@@ -30,7 +30,7 @@ import scala.annotation.tailrec
 
 package object specs {
   // Run with
-  //  testOnly FullSpec -- -l SlowTest
+  //   testOnly io.ireact.bioinformatics.specs.FullSpec -- -l io.ireact.bioinformatics.specs.SlowTest
   // to exclude tests that are marked as slow
   object SlowTest extends Tag("io.ireact.bioinformatics.specs.SlowTest")
 

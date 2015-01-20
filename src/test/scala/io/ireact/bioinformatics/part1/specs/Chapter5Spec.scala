@@ -371,7 +371,6 @@ class Chapter5Spec extends FeatureSpec with Matchers {
       val rscore = 8
       val rv = "PRT---EINS"
       val rw = "PRTWPSEIN-"
-      println(s"$v\n$w")
       affineGapAlignment(v, w) shouldBe (rscore, (rv, rw))
     }
     scenario("example2") {
