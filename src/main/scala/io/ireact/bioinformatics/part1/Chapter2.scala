@@ -24,6 +24,8 @@
 
 package io.ireact.bioinformatics.part1
 
+import io.ireact.bioinformatics.part1.support.Peptide
+
 import scala.annotation.tailrec
 
 object Chapter2 {
@@ -165,25 +167,41 @@ object Chapter2 {
   def massOf(peptide: String): Int =
     peptide.map(integerMass(_)).reduce(_ + _)
 
-  def theoreticalSpectrum(cyclicPeptide: String): Seq[(String, Int)] = {
+  def theoreticalSpectrum(cyclicPeptide: String): Seq[Int] = {
     val maxLength = cyclicPeptide.length
     val helper = cyclicPeptide + cyclicPeptide
-    var result = Seq(("", 0), (cyclicPeptide, massOf(cyclicPeptide)))
-    var forLength = 1
-    while (forLength < maxLength) {
-      var i = 0
-      while (i < maxLength) {
+    (1 until maxLength).foldLeft(Seq(0, massOf(cyclicPeptide))) { (masses, forLength) ⇒
+      (0 until maxLength).foldLeft(masses) { (masses, i) ⇒
         val subPeptide = helper.substring(i, i + forLength)
-        result = result :+ (subPeptide, massOf(subPeptide))
-        i += 1
+        massOf(subPeptide) +: masses
       }
-      forLength += 1
-    }
-    result.sortBy(_._2)
+    }.sorted
   }
 
-  type Peptide = Seq[Int]
   type Spectrum = Seq[Int]
+
+  def peptideFrom(peptide: String): Peptide = Peptide.from(peptide.map(integerMass(_)))
+
+  /**
+   * @return (cyclicSpectrum, linearSpectrum) with cyclicSpectrum sorted and linearSpectrum unsorted
+   */
+  private[this] final def spectra(peptide: Peptide): (Spectrum, Spectrum) = {
+    val prefixMass = peptide.value.foldLeft(IndexedSeq(0)) { (result, e) ⇒
+      result :+ (result.last) + e
+    }
+    val peptideMass = prefixMass.last
+    val peptideLength = peptide.value.length
+    val (cyclicSpectrum, linearSpectrum) =
+      (0 until peptideLength).foldLeft((Seq(0), Seq(0))) { (r, i) ⇒
+        ((i + 1) to peptideLength).foldLeft(r) {
+          case ((cyclicSpectrum, linearSpectrum), j) ⇒
+            val currentVal = prefixMass(j) - prefixMass(i)
+            (currentVal +: (if ((i > 0) && (j < peptideLength)) (peptideMass - currentVal) +: cyclicSpectrum else cyclicSpectrum),
+              currentVal +: linearSpectrum)
+        }
+      }
+    (cyclicSpectrum.sorted, linearSpectrum)
+  }
 
   def cyclicSpectrum(peptide: Peptide): Spectrum = {
     spectra(peptide)._1
@@ -193,38 +211,15 @@ object Chapter2 {
     spectra(peptide)._2.sorted
   }
 
-  /**
-   * @return (cyclicSpectrum, linearSpectrum) with cyclicSpectrum sorted and linearSpectrum unsorted
-   */
-  private[this] final def spectra(peptide: Peptide): (Spectrum, Spectrum) = {
-    var peptideMass = 0
-    val prefixMass = (0 +: peptide).map { e ⇒
-      peptideMass += e
-      peptideMass
-    }.toArray
-    var linearSpectrum = Seq(0)
-    var cyclicSpectrum = Seq(0)
-    val peptideLength = peptide.length
-    for (i ← 0 until peptideLength) {
-      for (j ← (i + 1) to peptideLength) {
-        val currentVal = prefixMass(j) - prefixMass(i)
-        linearSpectrum = currentVal +: linearSpectrum
-        cyclicSpectrum = currentVal +: cyclicSpectrum
-        if ((i > 0) && (j < peptideLength)) cyclicSpectrum = (peptideMass - currentVal) +: cyclicSpectrum
-      }
-    }
-    (cyclicSpectrum.sorted, linearSpectrum)
-  }
-
   @inline private[this] final def isConsistentWith(peptide: Peptide, spectrum: Spectrum): Boolean = {
-    peptide.diff(spectrum).isEmpty
+    peptide.value.diff(spectrum).isEmpty
   }
 
   private[this] final def expand(peptides: Seq[Peptide], massesToUse: Seq[Int] = masses): Seq[Peptide] = {
     for {
       peptide ← peptides
       mass ← massesToUse
-    } yield mass +: peptide // (we prepend but in the end it doesn't matter if the peptide is constructed in reverse, since the reverse will also be in the result
+    } yield Peptide.from(mass +: peptide.value) // (we prepend but in the end it doesn't matter if the peptide is constructed in reverse, since the reverse will also be in the result
   }
 
   /* uses massive memory, start sbt with:
@@ -234,7 +229,7 @@ object Chapter2 {
   def cyclopeptideSequencingBranchAndBound(spectrum: Spectrum): Set[Peptide] = {
     var results = Set.empty[Peptide]
     val basicAminoAcidsInSpectrum: Seq[Int] = masses.intersect(spectrum)
-    var peptides = Seq(Seq.empty[Int]) // DO NOT .par, due to some side-effect things go wrong
+    var peptides = Seq(Peptide.from(Seq.empty[Int])) // DO NOT .par, due to some side-effect things go wrong
     //println("Peptides = " + peptides.size)
     while (peptides.nonEmpty) {
       peptides = expand(peptides, basicAminoAcidsInSpectrum)
@@ -246,16 +241,10 @@ object Chapter2 {
           results += peptide
           //print(peptide.mkString("-") + " ")
           false
-        } else isConsistentWith(linearSpectrum, spectrum)
+        } else isConsistentWith(Peptide.from(linearSpectrum), spectrum)
       }
     }
     results
-  }
-
-  def peptideNumeric(peptide: String): Peptide = {
-    peptide.map { c ⇒
-      integerMass(c)
-    }
   }
 
   def score(left: Spectrum, right: Spectrum): Int = {
@@ -275,7 +264,7 @@ object Chapter2 {
     scoreImpl(left, right, 0)
   }
 
-  def massOf(peptide: Peptide): Int = peptide.reduce(_ + _)
+  def massOf(peptide: Peptide): Int = peptide.value.reduce(_ + _)
 
   def topWithTies[A](leaderboard: IndexedSeq[A], n: Int)(f: A ⇒ Int): IndexedSeq[A] = {
     if (n >= leaderboard.length) leaderboard
@@ -294,14 +283,14 @@ object Chapter2 {
       for {
         peptideData ← peptides
         mass ← massesToUse
-        newPeptide = mass +: peptideData.peptide
+        newPeptide = Peptide.from(mass +: peptideData.peptide.value)
         newLinearSpectrum = linearSpectrum(newPeptide)
         newScore = score(newLinearSpectrum, spectrum)
       } yield PeptideData(newPeptide, newLinearSpectrum, newScore)
     }
 
     val parentMass = spectrum.last
-    var leaderPeptideData = PeptideData(Seq.empty[Int], Seq(0), 1)
+    var leaderPeptideData = PeptideData(Peptide.from(Seq.empty[Int]), Seq(0), 1)
     var leaderboard = IndexedSeq(leaderPeptideData)
     println("Leaderboard = " + leaderboard.length)
     while (leaderboard.nonEmpty) {

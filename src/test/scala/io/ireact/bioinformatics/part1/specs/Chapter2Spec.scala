@@ -25,6 +25,7 @@
 package io.ireact.bioinformatics.part1.specs
 
 import io.ireact.bioinformatics.part1.Chapter2._
+import io.ireact.bioinformatics.part1.support.Peptide
 import org.scalatest.{ FeatureSpec, Matchers }
 
 import scala.io.Source
@@ -75,7 +76,17 @@ class Chapter2Spec extends FeatureSpec with Matchers {
 
   feature("theoreticalSpectrum") {
     scenario("tyrocidineB1") {
-      theoreticalSpectrum(tyrocidineB1).map(_._2) shouldBe Seq(0, 97, 99, 113, 114, 128, 128, 147, 147, 163, 186, 227, 241, 242, 244, 260, 261, 262, 283, 291, 333, 340, 357, 388, 389, 390, 390, 405, 430, 430, 447, 485, 487, 503, 504, 518, 543, 544, 552, 575, 577, 584, 631, 632, 650, 651, 671, 672, 690, 691, 738, 745, 747, 770, 778, 779, 804, 818, 819, 835, 837, 875, 892, 892, 917, 932, 932, 933, 934, 965, 982, 989, 1031, 1039, 1060, 1061, 1062, 1078, 1080, 1081, 1095, 1136, 1159, 1175, 1175, 1194, 1194, 1208, 1209, 1223, 1225, 1322)
+      theoreticalSpectrum(tyrocidineB1) shouldBe Seq(0, 97, 99, 113, 114, 128, 128, 147, 147, 163, 186, 227, 241, 242, 244, 260, 261, 262, 283, 291, 333, 340, 357, 388, 389, 390, 390, 405, 430, 430, 447, 485, 487, 503, 504, 518, 543, 544, 552, 575, 577, 584, 631, 632, 650, 651, 671, 672, 690, 691, 738, 745, 747, 770, 778, 779, 804, 818, 819, 835, 837, 875, 892, 892, 917, 932, 932, 933, 934, 965, 982, 989, 1031, 1039, 1060, 1061, 1062, 1078, 1080, 1081, 1095, 1136, 1159, 1175, 1175, 1194, 1194, 1208, 1209, 1223, 1225, 1322)
+    }
+  }
+
+  feature("cyclicSpectrum") {
+    scenario("example") {
+      val peptide = Peptide("113 128 186")
+      cyclicSpectrum(peptide) shouldBe Seq(0, 113, 128, 186, 241, 299, 314, 427)
+    }
+    scenario("tyrocidineB1") {
+      cyclicSpectrum(peptideFrom(tyrocidineB1)) shouldBe Seq(0, 97, 99, 113, 114, 128, 128, 147, 147, 163, 186, 227, 241, 242, 244, 260, 261, 262, 283, 291, 333, 340, 357, 388, 389, 390, 390, 405, 430, 430, 447, 485, 487, 503, 504, 518, 543, 544, 552, 575, 577, 584, 631, 632, 650, 651, 671, 672, 690, 691, 738, 745, 747, 770, 778, 779, 804, 818, 819, 835, 837, 875, 892, 892, 917, 932, 932, 933, 934, 965, 982, 989, 1031, 1039, 1060, 1061, 1062, 1078, 1080, 1081, 1095, 1136, 1159, 1175, 1175, 1194, 1194, 1208, 1209, 1223, 1225, 1322)
     }
   }
 
@@ -96,16 +107,6 @@ class Chapter2Spec extends FeatureSpec with Matchers {
 
     }
   }
-
-  //  val spectrum = theoreticalSpectrum(peptide)
-  //  println(s"theoreticalSpectrum($peptide) = " + spectrum.mkString(","))
-  ////  println(spectrum.map(_._2).mkString(" "))
-  //  val fastspectrum = fastCyclicSpectrum(peptide)
-  //  println(s"fastCyclicSpectrum($peptide) = " + fastspectrum.mkString(","))
-  //  println(fastspectrum.map(_._2).mkString(" "))
-
-  //  val peptideN = Seq(113,128,186)
-  //  println(s"fastCyclicSpectrumNumeric(${peptideN.mkString("-")}) = " + fastCyclicSpectrumNumeric(peptideN).mkString(" "))
 
   //    var peptide = "ALTM"
   //  println(s"fastCyclicSpectrum($peptide)" + fastCyclicSpectrum(peptide).map(_._2).mkString(" "))
