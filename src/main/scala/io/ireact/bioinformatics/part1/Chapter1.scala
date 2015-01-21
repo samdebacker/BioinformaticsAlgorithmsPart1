@@ -29,7 +29,7 @@ import scala.collection
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable
 
-object Chapter1 extends App {
+object Chapter1 {
   def patternCount(text: String, pattern: String): Int = {
     val patternLength = pattern.length
     @tailrec
@@ -37,6 +37,16 @@ object Chapter1 extends App {
       if (text.length < patternLength) result
       else patternCountImpl(text.substring(1), if (text.substring(0, patternLength) == pattern) result + 1 else result)
     patternCountImpl(text, 0)
+  }
+
+  def reverseComplement(text: String): String = {
+    @inline def complement(p: Char): Char = p match {
+      case 'A' ⇒ 'T'
+      case 'T' ⇒ 'A'
+      case 'G' ⇒ 'C'
+      case 'C' ⇒ 'G'
+    }
+    text.foldLeft(new StringBuilder(text.length)) { (r, c) ⇒ r.append(complement(c)) }.toString.reverse
   }
 
   def frequentWords(text: String, k: Int) = {
@@ -79,20 +89,6 @@ object Chapter1 extends App {
     }
     //println(maxCount)
     collection.immutable.Set[String](frequentPatterns.toArray: _*)
-  }
-
-  def reverseComplement(text: String): String = {
-    def complement(p: Char): Char = p match {
-      case 'A' ⇒ 'T'
-      case 'T' ⇒ 'A'
-      case 'G' ⇒ 'C'
-      case 'C' ⇒ 'G'
-    }
-    @tailrec
-    def reverseComplementImpl(text: String, result: List[Char]): String =
-      if (text.isEmpty) result.mkString
-      else reverseComplementImpl(text.tail, complement(text.head) :: result)
-    reverseComplementImpl(text, Nil)
   }
 
   def findPattern(text: String, pattern: String): List[Int] = {
@@ -336,47 +332,4 @@ object Chapter1 extends App {
   private def countApproxPatternAndComplementPattern(text: String, pattern: String, d: Int): Int = countApproxPattern(text, pattern, d) + countApproxPattern(text, reverseComplement(pattern), d)
 
   def mostFrequentWithComplementApproxPatterns(text: String, k: Int, d: Int): Set[String] = mostFrequentApproxPatternsImpl(text, k, d, countApproxPatternAndComplementPattern)
-
-  //  val text = "GCATGGGAATAATAATTCGCGGGGCATTCGCTCGCTCGCAATGGGTCGCCCAAGCATGGGGGGAATTCGCCCAAAATGCATGCATTCGCAATCCAAAATCCAATCGCGCATGGGGGGTCGCTCGCGGGCCAAGCATGCATGGGAATGGGGGGGCATGCATAATAATGCATAATAATCCAACCAAAATCCAAGGGCCAACCAAAATCCAAAATCCAAGGGTCGCCCAATCGCGGGGGGAATAATGGGGCATCCAACCAAGGGGCATAATGGGCCAAGCATGCATAATGCATGGGGGGGCATGCATTCGCCCAAAATAATCCAAGCATAAT"
-  //  val k = 9
-  //  val d = 2
-  val text = "TTCAGGAGAGGCTACAACTTCAGGAGAGTTCAGGAGAGGATGAGATTGTTCAGGAGAGGATGAGATTGGCTACAACGATGAGATTGGATGAGATTGGATGAGATTGTTCAGGAGAGGCTACAACGAGGTCCATTACACTTAGCTACAACGCTACAACGAGGTCCATTTCAGGAGAGTTCAGGAGAGGCTACAACGCTACAACGAGGTCCATGCTACAACGCTACAACTTCAGGAGAGGAGGTCCATGATGAGATTGTTCAGGAGAGTACACTTAGAGGTCCATTACACTTAGATGAGATTGGATGAGATTGGAGGTCCATTTCAGGAGAGGAGGTCCATGAGGTCCATGCTACAACGATGAGATTGTTCAGGAGAGGAGGTCCATTACACTTAGAGGTCCATGAGGTCCATTACACTTAGAGGTCCATGCTACAACGCTACAACTACACTTAGATGAGATTGGAGGTCCATGATGAGATTGTACACTTATTCAGGAGAGGCTACAACTTCAGGAGAGGAGGTCCATGAGGTCCATTACACTTATTCAGGAGAGGCTACAACGCTACAACTACACTTAGATGAGATTGGCTACAACGATGAGATTGGAGGTCCATTTCAGGAGAGGCTACAACTTCAGGAGAGTACACTTAGCTACAACGCTACAACTTCAGGAGAGTACACTTAGCTACAACGATGAGATTGTACACTTAGAGGTCCATTTCAGGAGAGGAGGTCCATGATGAGATTGGATGAGATTGTTCAGGAGAGTACACTTAGAGGTCCATGAGGTCCATTACACTTAGATGAGATTGGAGGTCCATGCTACAACGAGGTCCATGAGGTCCATTTCAGGAGAGGAGGTCCATTTCAGGAGAGGAGGTCCATTACACTTATACACTTA"
-  val k = 10
-  val d = 3
-  val result = mostFrequentApproxPatterns(text, k, d).mkString(" ")
-  println(s"mostFrequentApproxPatterns($text, $k, $d) = $result")
-
-  //  val text = "GTCTAGGTGTCAGGTCGTCACCACCACCACCTCACAGCTGTCCACGTCGTCTCTAGAGAGGTGTCACCACAGGTCACCACGTCGTCAGCTCTCACCACCACCTCACCTCACCTAGAGAGGTCACAGGTCGTCCACGTCAGGTCGTCTCACCTGTCACAGCTGTCGTCTCACAGGTCAGGTCGTCGTCCACGTCAGCT"
-  //  val k = 10
-  //  val d = 2
-  //  val result = mostFrequentWithComplementApproxPatterns(text, k, d).mkString(" ")
-  //  println(s"mostFrequentWithComplementApproxPatterns($text, $k, $d) = $result")
-
-  //  val text = "GCTAGCT"
-  //  println(s"reverseComplement('$text') = " + reverseComplement(text))
-
-  //  val t1 = "TGACCCGTTATGCTCGAGTTCGGTCAGAGCGTCATTGCGAGTAGTCGTTTGCTTTCTCAAACTCC"
-  //  val t2 = "GAGCGATTAAGCGTGACAGCCCCAGGGAACCCACAAAACGTGATCGCAGTCCATCCGATCATACA"
-  //  println(s"hammingDistance($t1,$t2) = " + hammingDistance(t1,t2))
-
-  //  val text = "CATTCCAGTACTTCATGATGGCGTGAAGA"
-  //  println(s"minSkew($text) = " + minSkew(text))
-  //  println(s"maxSkew($text) = " + maxSkew(text))
-
-  //  val text = "CCGACAGGCTAGTCTATAATCCTGAGGCGTTACCCCAATACCGTTTACCGTGGGATTTGCTACTACAACTCCTGAGCGCTACATGTACGAAACCATGTTATGTAT"
-  //  val k = 4
-  //  val L = 30
-  //  val t = 3
-  //  val clumpedPatterns = superFastFindClumps(text, k, L, t)
-  //  println(s"Found ${clumpedPatterns.size} patterns:\n" + clumpedPatterns.mkString(" "))
-
-  //  val text = "CATGCCATTCGCATTGTCCCAGTGA"
-  //  val pattern = "CCC"
-  //  val d = 2
-  //  println(s"countApproxPattern($text, $pattern, $d) = " + countApproxPattern(text, pattern, d))
-
-  //  val pattern = "ACGT"
-  //  val d =  3
-  //  val result = neighbours(pattern, d)
-  //  println(s"#neighbours($pattern, $d) = ${result.size}")
 }
