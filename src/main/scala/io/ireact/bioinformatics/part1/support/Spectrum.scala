@@ -26,25 +26,25 @@ package io.ireact.bioinformatics.part1.support
 
 import scala.util.matching.Regex
 
-object Peptide {
-  @inline def from(value: String): Option[Peptide] = {
+object Spectrum {
+  @inline def from(value: String): Option[Spectrum] = {
     if (isValid(value)) Some(unsafeFrom(value)) else None
   }
-  @inline def from(value: Seq[Int]): Peptide = new Peptide(value)
+  @inline def from(value: Seq[Int]): Spectrum = new Spectrum(value)
 
-  @inline def unsafeFrom(value: String): Peptide = new Peptide(value.split("""[ \-]""").map(_.toInt))
+  @inline def unsafeFrom(value: String): Spectrum = new Spectrum(value.split("""([ ])+""").map(_.toInt))
 
-  private[this] val peptideString: Regex = """(\d)+([ \-](\d)+)*""".r
+  private[this] val spectrumString: Regex = """(\d)+(([ ])+(\d)+)*""".r
   private[support] def isValid(value: String): Boolean = value.trim match {
-    case peptideString(_*) ⇒ true
-    case _                 ⇒ false
+    case spectrumString(_*) ⇒ true
+    case _                  ⇒ false
   }
 
   import scala.language.experimental.macros
   import scala.language.implicitConversions
-  implicit def apply(value: String): Peptide = macro PeptideMacro.applyMacro
+  implicit def apply(value: String): Spectrum = macro SpectrumMacro.applyMacro
 }
 
-final class Peptide private[support] (val value: Seq[Int]) extends AnyVal {
-  override def toString: String = value.mkString("-")
+final class Spectrum private[support] (val value: Seq[Int]) extends AnyVal {
+  override def toString: String = value.mkString("{", ",", "}")
 }

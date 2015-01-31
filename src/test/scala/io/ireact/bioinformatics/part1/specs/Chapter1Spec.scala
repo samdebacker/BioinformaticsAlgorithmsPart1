@@ -185,7 +185,7 @@ class Chapter1Spec extends FeatureSpec with Matchers {
   feature("neighbours") {
     scenario("example") {
       val pattern = "ACGT"
-      val d =  3
+      val d = 3
       neighbours(pattern, d).size shouldBe 175
     }
     scenario("interactive quiz") {
