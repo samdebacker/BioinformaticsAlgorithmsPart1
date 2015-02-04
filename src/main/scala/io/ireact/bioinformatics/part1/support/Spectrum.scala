@@ -32,7 +32,7 @@ object Spectrum {
   }
   @inline def from(value: Seq[Int]): Spectrum = new Spectrum(value)
 
-  @inline def unsafeFrom(value: String): Spectrum = new Spectrum(value.split("""([ ])+""").map(_.toInt))
+  @inline def unsafeFrom(value: String): Spectrum = new Spectrum(value.split("""([ ])+""").map(_.toInt).sorted)
 
   private[this] val spectrumString: Regex = """(\d)+(([ ])+(\d)+)*""".r
   private[support] def isValid(value: String): Boolean = value.trim match {

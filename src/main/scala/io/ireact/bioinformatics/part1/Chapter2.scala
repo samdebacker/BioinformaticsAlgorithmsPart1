@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 www.iReact.io
+ * Copyright (c) 2014, 2015 www.iReact.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -209,7 +209,6 @@ object Chapter2 {
     Spectrum.from(spectra(peptide)._2.sorted)
   }
 
-
   /* uses massive memory, start sbt with:
       sbt -J-Xmx12G
      well not anymore since we now correctly check the LSP is consistent with the SP, and not my own peptide is consistent with elements in spectrum
@@ -262,16 +261,11 @@ object Chapter2 {
 
   def massOf(peptide: Peptide): Int = peptide.value.reduce(_ + _)
 
-  def topWithTies[A](leaderboard: IndexedSeq[A], n: Int)(f: A ⇒ Int): IndexedSeq[A] = {
+  private[this] def topWithTies[A](leaderboard: IndexedSeq[A], n: Int)(f: A ⇒ Int): IndexedSeq[A] = {
     if (n >= leaderboard.length) leaderboard
     else {
       val pivot = f(leaderboard(n - 1))
-
-
-      //leaderboard.takeWhile(f(_) >= pivot)
-      var i = n
-      while (i < leaderboard.length && f(leaderboard(i)) == pivot) i += 1
-      leaderboard.take(i)
+      leaderboard.takeWhile(f(_) >= pivot)
     }
   }
 
@@ -295,7 +289,6 @@ object Chapter2 {
     while (leaderboard.nonEmpty) {
       leaderboard = expand(leaderboard)
       //println("Leaderboard expanded = " + leaderboard.length)
-
       leaderboard = leaderboard.filter { currentPeptideData ⇒
         val massCurrentPeptide = massOf(currentPeptideData.peptide)
         if (massCurrentPeptide == parentMass) {
@@ -314,7 +307,7 @@ object Chapter2 {
     leaderPeptideData.peptide
   }
 
-  def spectralConvolution(spectrum: Spectrum): IndexedSeq[Int] = {
+  private[this] def spectralConvolution(spectrum: Spectrum): IndexedSeq[Int] = {
     var result = IndexedSeq.empty[Int]
     for (i ← 0 until spectrum.value.length) {
       for (j ← (i + 1) until spectrum.value.length) {
