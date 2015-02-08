@@ -54,11 +54,11 @@ object Chapter3 {
   private val FROM_NUCLEOTIDE_TO_INDEX_CONVERTION = Map('A' -> 0, 'C' -> 1, 'G' -> 2, 'T' -> 3)
   def toIndex(nucleotide: Char): Int = FROM_NUCLEOTIDE_TO_INDEX_CONVERTION(nucleotide)
 
-  def count(motifs: IndexedSeq[DNA]): DenseMatrix[Double] = {
-    val k = motifs.head.length
+  def count(motifs: DNAMotif): DenseMatrix[Double] = {
+    val k = motifs.value.head.value.length
     val m = DenseMatrix.zeros[Double](4, k)
-    for (motif ← motifs; j ← 0 until motif.size) {
-      val nucleotide = motif.charAt(j)
+    for (motif ← motifs.value; j ← 0 until motif.value.size) {
+      val nucleotide = motif.value.charAt(j)
       m(toIndex(nucleotide), j) += 1
     }
     m
@@ -66,8 +66,8 @@ object Chapter3 {
 
   type Profile = DenseMatrix[Double]
 
-  def profile(motifs: IndexedSeq[DNA], addCount: Int = 0): Profile = {
-    val t = motifs.length
+  def profile(motifs: DNAMotif, addCount: Int = 0): Profile = {
+    val t = motifs.value.length
     val c: Profile = count(motifs) :+ addCount.toDouble
     c :/ t.toDouble
   }
@@ -91,24 +91,24 @@ object Chapter3 {
     consensi_(p, Set("")) - ""
   }
 
-  def consensus(motifs: IndexedSeq[DNA]): String = {
+  def consensus(motifs: DNAMotif): DNAString = {
     val p = profile(motifs)
-    val k = motifs.head.length
+    val k = motifs.value.head.value.length
     val s = new StringBuilder
     for (j ← 0 until k) {
       s.append(fromIndex(argmax(p(::, j))))
     }
-    s.toString()
+    DNAString.from(s.toString()).get
   }
 
-  def score(motifs: IndexedSeq[DNA]): Int = {
+  def score(motifs: DNAMotif): Int = {
     val c = consensus(motifs)
-    motifs.foldLeft(0) { (d, text) ⇒
-      d + Chapter1.hammingDistance(c, text)
+    motifs.value.foldLeft(0) { (d, text) ⇒
+      d + Chapter1.hammingDistance(c.value, text.value)
     }
   }
 
-  def entropy(motifs: IndexedSeq[DNA]): Double = {
+  def entropy(motifs: DNAMotif): Double = {
     def entropy(v: Vector[Double]): Double = {
       def log2(x: Double): Double = log(x) / log(2)
       v.fold(0.0) { (acc, el) ⇒
@@ -116,26 +116,26 @@ object Chapter3 {
       }
     }
     val p = profile(motifs)
-    val k = motifs.head.length
+    val k = motifs.value.head.value.length
     (for {
       j ← 0 until k
     } yield entropy(p(::, j))).sum
   }
 
-  def distance(pattern: String, dna: IndexedSeq[DNA]): Int = {
-    val k = pattern.length
+  def distance(pattern: DNAString, dna: IndexedSeq[DNAString]): Int = {
+    val k = pattern.value.length
     dna.map { d ⇒
       (for {
-        i ← 0 to (d.length - k)
-        kMer = d.substring(i, i + k)
-      } yield Chapter1.hammingDistance(pattern, kMer)).min
+        i ← 0 to (d.value.length - k)
+        kMer = d.value.substring(i, i + k)
+      } yield Chapter1.hammingDistance(pattern.value, kMer)).min
     }.sum
   }
 
-  def bruteForceMedianString(dna: IndexedSeq[DNA], k: Int, all: Boolean = false): Set[String] = {
+  def bruteForceMedianString(dna: IndexedSeq[DNAString], k: Int, all: Boolean = false): Set[DNAString] = {
     val DPs = for {
       i ← 0 until pow(4, k).toInt
-      pattern = Chapter1.numberToPattern(i, k)
+      pattern = DNAString.unsafeFrom(Chapter1.numberToPattern(i, k))
       d = distance(pattern, dna)
     } yield (d, pattern)
 
@@ -143,28 +143,27 @@ object Chapter3 {
     (if (all) DPs.filter(_._1 == minimalDP._1) else Seq(minimalDP)).map(_._2).toSet
   }
 
-  def probability(text: String, profile: Profile): Double = {
+  def probability(text: DNAString, profile: Profile): Double = {
     @tailrec def probability_(text: String, profile: Profile, result: Double): Double = {
       if (text.isEmpty || profile.cols == 0)
         result
       else
         probability_(text.tail, profile(::, 1 until profile.cols), result * profile(toIndex(text.head), 0))
     }
-    probability_(text, profile, 1.0)
+    probability_(text.value, profile, 1.0)
   }
 
-  @deprecated("use the weeks4.compostionkMers", "0.1")
-  def kMers(text: DNA, k: Int): IndexedSeq[DNA] = {
-    @tailrec def kMers_(text: String, result: IndexedSeq[DNA]): IndexedSeq[DNA] = {
+  def kMers(text: DNAString, k: Int): IndexedSeq[DNAString] = {
+    @tailrec def kMers_(text: String, result: IndexedSeq[DNAString]): IndexedSeq[DNAString] = {
       if (text.length < k)
         result
       else
-        kMers_(text.tail, result :+ text.take(k))
+        kMers_(text.tail, result :+ DNAString.from(text.take(k)).get)
     }
-    kMers_(text, IndexedSeq.empty[DNA])
+    kMers_(text.value, IndexedSeq.empty[DNAString]).sortBy(_.value)
   }
 
-  def profileMostProbableKmer(text: String, k: Int, profile: Profile): String = {
+  def profileMostProbableKmer(text: DNAString, k: Int, profile: Profile): DNAString = {
     kMers(text, k).map { kMer ⇒
       (probability(kMer, profile), kMer)
     }.maxBy(_._1)._2
@@ -172,31 +171,31 @@ object Chapter3 {
   }
 
   // http://www.mrgraeme.co.uk/greedy-motif-search/
-  private def greedyMotifSearch_(addCount: Int)(dna: IndexedSeq[DNA], k: Int, t: Int): IndexedSeq[String] = {
+  private def greedyMotifSearch_(addCount: Int)(dna: IndexedSeq[DNAString], k: Int, t: Int): IndexedSeq[DNAString] = {
     val allMotifs = kMers(dna.head, k).map { kMer ⇒
       val motifs = dna.tail.foldLeft(IndexedSeq(kMer)) { (acc, text) ⇒
-        acc :+ profileMostProbableKmer(text, k, profile(acc, addCount))
+        acc :+ profileMostProbableKmer(text, k, profile(DNAMotif.unsafeFrom(acc), addCount))
       }
-      (motifs, score(motifs))
+      (motifs, score(DNAMotif.unsafeFrom(motifs)))
     }
     allMotifs.minBy(_._2)._1
     // CAREFUL minBy uses LT comparison, while min uses LTEQ comparison! and the minBy looks nicer!
     //allMotifs.min(Ordering[Int].on[(IndexedSeq[String],Int)](_._2))._1
   }
 
-  val greedyMotifSearch: (IndexedSeq[DNA], Int, Int) ⇒ IndexedSeq[String] = greedyMotifSearch_(0)
-  val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNA], Int, Int) ⇒ IndexedSeq[String] = greedyMotifSearch_(1)
+  val greedyMotifSearch: (IndexedSeq[DNAString], Int, Int) ⇒ IndexedSeq[DNAString] = greedyMotifSearch_(0)
+  val greedyMotifSearchWithPseudocounts: (IndexedSeq[DNAString], Int, Int) ⇒ IndexedSeq[DNAString] = greedyMotifSearch_(1)
 
-  def randomizedMotifSearch(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int = 1000): IndexedSeq[String] = {
-    def motifs(profile: Profile, dna: IndexedSeq[DNA]): IndexedSeq[String] = {
-      dna.map(profileMostProbableKmer(_, k, profile))
+  def randomizedMotifSearch(dna: IndexedSeq[DNAString], k: Int, t: Int, N: Int = 1000): IndexedSeq[DNAString] = {
+    def motifs(profile: Profile, dna: IndexedSeq[DNAString]): DNAMotif = {
+      DNAMotif.unsafeFrom(dna.map(profileMostProbableKmer(_, k, profile)))
     }
 
-    (1 to N).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) {
+    (1 to N).foldLeft((IndexedSeq.empty[DNAString], Int.MaxValue)) {
       case ((overalBestMotifs, scoreOveralBestMotifs), _) ⇒
-        var currentMotifs = dna.map { text ⇒
-          text.drop(Random.nextInt(text.length - k + 1)).take(k)
-        }
+        var currentMotifs = DNAMotif.unsafeFrom(dna.map { text ⇒
+          DNAString.unsafeFrom(text.value.drop(Random.nextInt(text.value.length - k + 1)).take(k))
+        })
         var bestMotifs = (currentMotifs, score(currentMotifs))
         var continue = true
         while (continue) {
@@ -211,7 +210,7 @@ object Chapter3 {
         }
         if (bestMotifs._2 < scoreOveralBestMotifs) {
           //println("Overal: " + bestMotifs)
-          bestMotifs
+          (bestMotifs._1.value, bestMotifs._2)
         } else
           (overalBestMotifs, scoreOveralBestMotifs)
     }._1
@@ -227,27 +226,27 @@ object Chapter3 {
     random_(roll, prob, 0)
   }
 
-  def profileRandomlyGeneratedKmer(text: String, k: Int, profile: Profile): String = {
+  def profileRandomlyGeneratedKmer(text: DNAString, k: Int, profile: Profile): DNAString = {
     val km = kMers(text, k)
     val chosenIndex = random(km.map(probability(_, profile)): _*)
     km(chosenIndex)
   }
 
-  def gibbsSampler(dna: IndexedSeq[DNA], k: Int, t: Int, N: Int, M: Int = 20): IndexedSeq[String] = {
-    (1 to M).foldLeft((IndexedSeq.empty[String], Int.MaxValue)) {
+  def gibbsSampler(dna: IndexedSeq[DNAString], k: Int, t: Int, N: Int, M: Int = 20): IndexedSeq[DNAString] = {
+    (1 to M).foldLeft((IndexedSeq.empty[DNAString], Int.MaxValue)) {
       case ((overalBestMotifs, scoreOveralBestMotifs), _) ⇒
-        val startMotifs = dna.map { text ⇒
-          text.drop(Random.nextInt(text.length - k + 1)).take(k)
-        }
+        val startMotifs = DNAMotif.unsafeFrom(dna.map { text ⇒
+          DNAString.unsafeFrom(text.value.drop(Random.nextInt(text.value.length - k + 1)).take(k))
+        })
         val current = (1 to N).foldLeft((startMotifs, score(startMotifs))) {
           case ((bestMotifs, scoreBestMotifs), _) ⇒
             val i = Random.nextInt(t)
             //print(bestMotifs + " " + i)
-            val (front, back) = bestMotifs.splitAt(i)
+            val (front, back) = bestMotifs.value.splitAt(i)
             //print(" " + (front ++ back.tail))
-            val newProfile = profile(front ++ back.tail, 1)
+            val newProfile = profile(DNAMotif.unsafeFrom(front ++ back.tail), 1)
             //println(p)
-            val newMotifs = (front :+ profileRandomlyGeneratedKmer(dna(i), k, newProfile)) ++ back.tail
+            val newMotifs = DNAMotif.unsafeFrom((front :+ profileRandomlyGeneratedKmer(dna(i), k, newProfile)) ++ back.tail)
             val newScore = score(newMotifs)
             if (newScore < scoreBestMotifs)
               (newMotifs, newScore)
@@ -255,7 +254,7 @@ object Chapter3 {
               (bestMotifs, scoreBestMotifs)
         }
         if (current._2 < scoreOveralBestMotifs)
-          current
+          (current._1.value, current._2)
         else
           (overalBestMotifs, scoreOveralBestMotifs)
     }._1

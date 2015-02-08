@@ -140,6 +140,7 @@ object Chapter1 {
 
   private def alpha(i: Int): Char = CONVERTION(i)
 
+  // TODO move this to DNAString
   private def patternToNumber(pattern: String): Int = {
     @tailrec def patternToNumberImpl(pattern: String, result: Int): Int = {
       if (pattern.length == 0) result
@@ -148,6 +149,7 @@ object Chapter1 {
     patternToNumberImpl(pattern, 0)
   }
 
+  // TODO move this to DNAString
   def numberToPattern(n: Int, l: Int): String = {
     @tailrec def numberToPatternImpl(n: Int, result: List[Char]): String = {
       if (result.length == l) result.mkString

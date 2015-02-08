@@ -25,22 +25,13 @@
 package io.ireact.bioinformatics.part1
 
 import support.{ DNAMotif, DNAString }
+import Chapter3.kMers
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
 import scala.util.Random
 
 object Chapter4 {
-  def compositionKmers(text: DNAString, k: Int): IndexedSeq[DNAString] = {
-    @tailrec def kMers_(text: String, result: IndexedSeq[DNAString]): IndexedSeq[DNAString] = {
-      if (text.length < k)
-        result
-      else
-        kMers_(text.tail, result :+ DNAString.from(text.take(k)).get)
-    }
-    kMers_(text.value, IndexedSeq.empty[DNAString]).sortBy(_.value)
-  }
-
   def stringSpelledByGenomePath(path: DNAMotif): DNAString = {
     val k = path.k
     DNAString.from(path.value.tail.foldLeft(new StringBuilder(path.value.head.value)) { (acc, el) ⇒
@@ -58,7 +49,7 @@ object Chapter4 {
   }
 
   def deBruijn(text: DNAString, k: Int): Map[DNAString, IndexedSeq[DNAString]] = {
-    val result = (for (p ← compositionKmers(text, k)) yield (DNAString.unsafeFrom(p.value.take(k - 1)), DNAString.unsafeFrom(p.value.tail)))
+    val result = (for (p ← kMers(text, k)) yield (DNAString.unsafeFrom(p.value.take(k - 1)), DNAString.unsafeFrom(p.value.tail)))
       .groupBy(_._1)
       .toIndexedSeq
       .map {

@@ -28,14 +28,6 @@ import breeze.linalg.DenseMatrix
 import io.ireact.bioinformatics.part1.Chapter3._
 
 package object support {
-
-  implicit class DnaHelper(val sc: StringContext) extends AnyVal {
-    @deprecated("use DNAString and DNAMotif", "0.1")
-    def dna(args: Any*): IndexedSeq[DNA] = {
-      sc.parts.mkString.trim.toUpperCase.split("\\W+").toIndexedSeq
-    }
-  }
-
   implicit class ProfileHelper(val sc: StringContext) extends AnyVal {
     def profile(args: Any*): Profile = {
       val m = sc.parts.mkString.trim.split("[^\\d\\.]+").map(_.toDouble)
