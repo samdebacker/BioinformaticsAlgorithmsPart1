@@ -285,7 +285,6 @@ class Chapter3Spec extends FeatureSpec with Matchers {
     }
   }
 
-
   feature("profileMostProbableKmer") {
     scenario("sample") {
       val text = DNAString("ACCTGTTTATTGCCTAAGTTCCGAACAAACCCAATATAGCCCGAGGGCCT")
